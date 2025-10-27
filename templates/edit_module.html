@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Modifier Module</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container mt-4">
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+                <div class="card">
+                    <div class="card-header">
+                        <h4>✏️ Modifier le Module d'Enseignement</h4>
+                    </div>
+                    <div class="card-body">
+                        <form method="POST">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label class="form-label">Nom du Module *</label>
+                                        <input type="text" class="form-control" name="nom_module" value="{{ module.nom_module }}" required>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label class="form-label">Établissement *</label>
+                                        <select class="form-select" name="ecole_id" id="ecoleSelect" required onchange="toggleNewEcoleInput()">
+                                            <option value="">Sélectionner un établissement</option>
+                                            {% for ecole in ecoles %}
+                                            <option value="{{ ecole.id }}" {% if ecole.id == module.ecole_id %}selected{% endif %}>{{ ecole.nom }}</option>
+                                            {% endfor %}
+                                            <option value="new">➕ Ajouter un nouvel établissement</option>
+                                        </select>
+                                        <div id="newEcoleFields" style="display:none; margin-top:10px;">
+                                            <input type="text" class="form-control mb-2" name="new_ecole_nom" placeholder="Nom de l'établissement">
+                                            <input type="text" class="form-control mb-2" name="new_ecole_type" placeholder="Type d'établissement">
+                                            <input type="text" class="form-control mb-2" name="new_ecole_ville" placeholder="Ville">
+                                            <input type="text" class="form-control mb-2" name="new_ecole_contact" placeholder="Contact">
+                                        </div>
+                                        <script>
+                                            function toggleNewEcoleInput() {
+                                                var select = document.getElementById('ecoleSelect');
+                                                var newFields = document.getElementById('newEcoleFields');
+                                                if (select.value === 'new') {
+                                                    newFields.style.display = 'block';
+                                                    select.removeAttribute('required');
+                                                } else {
+                                                    newFields.style.display = 'none';
+                                                    select.setAttribute('required', 'required');
+                                                }
+                                            }
+                                        </script>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label class="form-label">Niveau *</label>
+                                        <select class="form-select" name="niveau" required>
+                                            <option value="Licence 1" {% if module.niveau == 'Licence 1' %}selected{% endif %}>Licence 1</option>
+                                            <option value="Licence 2" {% if module.niveau == 'Licence 2' %}selected{% endif %}>Licence 2</option>
+                                            <option value="Licence 3" {% if module.niveau == 'Licence 3' %}selected{% endif %}>Licence 3</option>
+                                            <option value="Master 1" {% if module.niveau == 'Master 1' %}selected{% endif %}>Master 1</option>
+                                            <option value="Master 2" {% if module.niveau == 'Master 2' %}selected{% endif %}>Master 2</option>
+                                            <option value="Doctorat" {% if module.niveau == 'Doctorat' %}selected{% endif %}>Doctorat</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label class="form-label">Année Universitaire *</label>
+                                        <select class="form-select" name="annee_universitaire" required>
+                                            <option value="2023-2024" {% if module.annee_universitaire == '2023-2024' %}selected{% endif %}>2023-2024</option>
+                                            <option value="2024-2025" {% if module.annee_universitaire == '2024-2025' %}selected{% endif %}>2024-2025</option>
+                                            <option value="2025-2026" {% if module.annee_universitaire == '2025-2026' %}selected{% endif %}>2025-2026</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <div class="mb-3">
+                                        <label class="form-label">Volume CM (heures)</label>
+                                        <input type="number" class="form-control" name="volume_cm" id="volume_cm" value="{{ module.volume_cm }}" step="0.5">
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="mb-3">
+                                        <label class="form-label">Volume TD (heures)</label>
+                                        <input type="number" class="form-control" name="volume_td" id="volume_td" value="{{ module.volume_td }}" step="0.5">
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="mb-3">
+                                        <label class="form-label">Volume TP (heures)</label>
+                                        <input type="number" class="form-control" name="volume_tp" id="volume_tp" value="{{ module.volume_tp }}" step="0.5">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label class="form-label">Volume Horaire Total (heures)</label>
+                                        <input type="text" class="form-control" id="volume_total_display" readonly value="{{ module.volume_total }}">
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label class="form-label">Tarif Horaire (FCFA) *</label>
+                                        <input type="number" class="form-control" name="montant_heure" id="montant_heure" value="{{ module.montant_heure }}" required min="0" step="100">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label">Montant Total Calculé (FCFA)</label>
+                                <input type="text" class="form-control" id="montant_total_display" readonly value="{{ module.montant_total }}">
+                            </div>
+
+                            <div class="d-grid gap-2">
+                                <button type="submit" class="btn btn-primary">Mettre à Jour le Module</button>
+                                <a href="/" class="btn btn-secondary">Retour au Tableau de Bord</a>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function calculateTotals() {
+            const cm = parseFloat(document.getElementById('volume_cm').value) || 0;
+            const td = parseFloat(document.getElementById('volume_td').value) || 0;
+            const tp = parseFloat(document.getElementById('volume_tp').value) || 0;
+            const tarif = parseFloat(document.getElementById('montant_heure').value) || 0;
+
+            const volumeTotal = cm + td + tp;
+            const montantTotal = volumeTotal * tarif;
+
+            document.getElementById('volume_total_display').value = volumeTotal.toFixed(1);
+            document.getElementById('montant_total_display').value = montantTotal.toLocaleString('fr-FR');
+        }
+
+        // Ajouter des écouteurs d'événements aux entrées de volume et de tarif
+        document.getElementById('volume_cm').addEventListener('input', calculateTotals);
+        document.getElementById('volume_td').addEventListener('input', calculateTotals);
+        document.getElementById('volume_tp').addEventListener('input', calculateTotals);
+        document.getElementById('montant_heure').addEventListener('input', calculateTotals);
+
+        // Calcul initial
+        calculateTotals();
+    </script>
+</body>
+</html>

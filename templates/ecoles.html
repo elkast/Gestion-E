@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestion des Établissements</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container mt-4">
+        <nav class="navbar navbar-expand-lg navbar-dark bg-primary mb-4">
+            <div class="container">
+                <a class="navbar-brand" href="/"> Gestion Enseignement</a>
+                <div class="navbar-nav">
+                    <a class="nav-link" href="/">Tableau de Bord</a>
+                    <a class="nav-link" href="/ajouter-module">Nouveau Module</a>
+                    <a class="nav-link active" href="/ecoles">Établissements</a>
+                    <a class="nav-link" href="/gestion-volumes-niveau">Gestion Volumes par Niveau</a>
+                    <a class="nav-link" href="/finances-ecoles">États Financiers</a>
+                    <a class="nav-link" href="/export">Export</a>
+                </div>
+            </div>
+        </nav>
+
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="text-white">🏫 Établissements Scolaires</h5>
+                <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addEcoleModal">
+                    ➕ Ajouter Établissement
+                </button>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Nom</th>
+                                <th>Type</th>
+                                <th>Ville</th>
+                                <th>Contact</th>
+                                <th>Téléphone</th>
+                                <th>Montant Total (FCFA)</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for ecole in ecoles %}
+                            <tr>
+                                <td>{{ ecole.nom }}</td>
+                                <td>{{ ecole.type_etablissement }}</td>
+                                <td>{{ ecole.ville }}</td>
+                                <td>{{ ecole.contact }}</td>
+                                <td>{{ ecole.telephone }}</td>
+                                <td>{{ "{:,.0f}".format(ecole.montant_total_ecole) }}</td>
+                                <td>
+                                    <a href="/edit-ecole/{{ ecole.id }}" class="btn btn-sm btn-outline-secondary">✏️ Modifier</a>
+                                    <a href="/delete-ecole/{{ ecole.id }}" class="btn btn-sm btn-outline-danger" onclick="return confirm('Supprimer cet établissement ?')">🗑️ Supprimer</a>
+                                </td>
+                            </tr>
+                            {% if ecole.montants_par_niveau %}
+                            {% for niveau in ecole.montants_par_niveau %}
+                            <tr class="table-light">
+                                <td colspan="5" style="padding-left: 40px;"><em>{{ niveau.niveau }}</em></td>
+                                <td>{{ "{:,.0f}".format(niveau.montant_total_niveau) }}</td>
+                                <td></td>
+                            </tr>
+                            {% endfor %}
+                            {% endif %}
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Modal Ajouter Établissement -->
+    <div class="modal fade" id="addEcoleModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Ajouter un Établissement</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <form method="POST" action="/ajouter-ecole">
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label class="form-label">Nom de l'Établissement *</label>
+                            <input type="text" class="form-control" name="nom" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Type d'Établissement</label>
+                            <select class="form-select" name="type_etablissement">
+                                <option value="Université">Université</option>
+                                <option value="Institut">Institut</option>
+                                <option value="École">École</option>
+                                <option value="Centre de Formation">Centre de Formation</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Ville</label>
+                            <input type="text" class="form-control" name="ville">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Contact (Email)</label>
+                            <input type="email" class="form-control" name="contact">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Téléphone</label>
+                            <input type="tel" class="form-control" name="telephone">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Volume CM (heures)</label>
+                            <input type="number" step="0.01" class="form-control" name="volume_cm" value="0">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Volume TD (heures)</label>
+                            <input type="number" step="0.01" class="form-control" name="volume_td" value="0">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Volume TP (heures)</label>
+                            <input type="number" step="0.01" class="form-control" name="volume_tp" value="0">
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                        <button type="submit" class="btn btn-primary">Ajouter</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

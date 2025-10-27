@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>Ajouter un Module</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+  <h1>Ajouter un Module</h1>
+  <form method="POST" action="{{ url_for('add_module') }}">
+    <label>Nom du module :</label><br>
+    <input type="text" name="nom" required><br>
+    <label>École :</label><br>
+    <input type="text" name="ecole" required><br>
+    <label>Niveau :</label><br>
+    <input type="text" name="niveau" required><br>
+    <label>Tarif horaire (FCFA) :</label><br>
+    <input type="number" name="tarif_horaire" min="0" step="0.01" required><br>
+    <label>Heures CM :</label><br>
+    <input type="number" name="heures_cm" min="0" required><br>
+    <label>Heures TD :</label><br>
+    <input type="number" name="heures_td" min="0" required><br>
+    <label>Heures TP :</label><br>
+    <input type="number" name="heures_tp" min="0" required><br><br>
+    <button type="submit">Ajouter</button>
+  </form>
+  <p><a href="{{ url_for('index') }}">Retour au tableau de bord</a></p>
+</body>
+</html>

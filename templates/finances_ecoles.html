@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>États Financiers par École - Gestion Enseignement</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+</head>
+<body>
+    <div class="container-fluid">
+        <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+            <div class="container">
+                <a class="navbar-brand" href="/"> Gestion Enseignement</a>
+                <div class="navbar-nav">
+                    <a class="nav-link" href="/">Tableau de Bord</a>
+                    <a class="nav-link" href="/ajouter-module">Nouveau Module</a>
+                    <a class="nav-link" href="/ecoles">Établissements</a>
+                    <a class="nav-link" href="/gestion-volumes-niveau">Gestion Volumes par Niveau</a>
+                    <a class="nav-link active" href="/finances-ecoles">États Financiers</a>
+                    <a class="nav-link" href="/export">Export</a>
+                </div>
+            </div>
+        </nav>
+
+        <div class="card mt-4">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5>💰 États Financiers par École</h5>
+                <form method="get" action="{{ url_for('finances_ecoles') }}" class="d-flex w-25">
+                    <input type="text" name="search" value="{{ search }}" class="form-control" placeholder="Rechercher une école..." />
+                    <button type="submit" class="btn btn-primary ms-2">Rechercher</button>
+                </form>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-striped table-hover">
+                        <thead class="table-dark">
+                            <tr>
+                                <th scope="col">
+                                    <a href="{{ url_for('finances_ecoles', sort_by='nom_ecole', order='asc' if sort_by != 'nom_ecole' or order == 'desc' else 'desc', search=search, page=1) }}">
+                                        École
+                                        {% if sort_by == 'nom_ecole' %}
+                                            {% if order == 'asc' %}▲{% else %}▼{% endif %}
+                                        {% endif %}
+                                    </a>
+                                </th>
+                                <th scope="col">
+                                    <a href="{{ url_for('finances_ecoles', sort_by='total_du', order='asc' if sort_by != 'total_du' or order == 'desc' else 'desc', search=search, page=1) }}">
+                                        Total Dû
+                                        {% if sort_by == 'total_du' %}
+                                            {% if order == 'asc' %}▲{% else %}▼{% endif %}
+                                        {% endif %}
+                                    </a>
+                                </th>
+                                <th scope="col">
+                                    <a href="{{ url_for('finances_ecoles', sort_by='total_percu', order='asc' if sort_by != 'total_percu' or order == 'desc' else 'desc', search=search, page=1) }}">
+                                        Déjà Perçu
+                                        {% if sort_by == 'total_percu' %}
+                                            {% if order == 'asc' %}▲{% else %}▼{% endif %}
+                                        {% endif %}
+                                    </a>
+                                </th>
+                                <th scope="col">
+                                    <a href="{{ url_for('finances_ecoles', sort_by='reste_a_payer', order='asc' if sort_by != 'reste_a_payer' or order == 'desc' else 'desc', search=search, page=1) }}">
+                                        Reste à Payer
+                                        {% if sort_by == 'reste_a_payer' %}
+                                            {% if order == 'asc' %}▲{% else %}▼{% endif %}
+                                        {% endif %}
+                                    </a>
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for finance in finances_ecoles %}
+                            <tr>
+                                <td>{{ finance.nom_ecole }}</td>
+                                <td>{{ "{:,.0f}".format(finance.total_du) }} FCFA</td>
+                                <td>{{ "{:,.0f}".format(finance.total_percu) }} FCFA</td>
+                                <td>
+                                    <span class="{% if finance.reste_a_payer > 0 %}text-danger{% else %}text-success{% endif %}">
+                                        {{ "{:,.0f}".format(finance.reste_a_payer) }} FCFA
+                                    </span>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                <nav>
+                    <ul class="pagination justify-content-center">
+                        {% if page > 1 %}
+                        <li class="page-item">
+                            <a class="page-link" href="{{ url_for('finances_ecoles', page=page-1, sort_by=sort_by, order=order, search=search) }}">Précédent</a>
+                        </li>
+                        {% endif %}
+                        {% for p in range(1, total_pages + 1) %}
+                        <li class="page-item {% if p == page %}active{% endif %}">
+                            <a class="page-link" href="{{ url_for('finances_ecoles', page=p, sort_by=sort_by, order=order, search=search) }}">{{ p }}</a>
+                        </li>
+                        {% endfor %}
+                        {% if page < total_pages %}
+                        <li class="page-item">
+                            <a class="page-link" href="{{ url_for('finances_ecoles', page=page+1, sort_by=sort_by, order=order, search=search) }}">Suivant</a>
+                        </li>
+                        {% endif %}
+                    </ul>
+                </nav>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

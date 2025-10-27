@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestion des Volumes Horaire par Niveau</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container mt-4">
+        <nav class="navbar navbar-expand-lg navbar-dark bg-primary mb-4">
+            <div class="container">
+                <a class="navbar-brand" href="/">📚 Gestion Enseignement</a>
+                <div class="navbar-nav">
+                    <a class="nav-link" href="/">Tableau de Bord</a>
+                    <a class="nav-link" href="/ajouter-module">Nouveau Module</a>
+                    <a class="nav-link" href="/ecoles">Établissements</a>
+                    <a class="nav-link active" href="/gestion-volumes-niveau">Gestion Volumes par Niveau</a>
+                    <a class="nav-link" href="/finances-ecoles">États Financiers</a>
+                    <a class="nav-link" href="/export">Export</a>
+                </div>
+            </div>
+        </nav>
+
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="text-white">📊 Gestion des Volumes Horaire par Niveau</h5>
+            </div>
+            <div class="card-body">
+                <p class="text-muted">Sélectionnez un établissement pour gérer les volumes horaires par niveau académique (CM, TD, TP).</p>
+                <div class="row">
+                    {% for ecole in ecoles %}
+                    <div class="col-md-4 mb-3">
+                        <div class="card h-100">
+                            <div class="card-body text-center">
+                                <h6 class="card-title">{{ ecole.nom }}</h6>
+                                <a href="/ecole/{{ ecole.id }}/volumes-niveau" class="btn btn-primary btn-sm">Gérer Volumes</a>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
