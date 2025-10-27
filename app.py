@@ -1,26 +1,50 @@
-from flask import Flask, render_template, request, redirect, url_for, flash, send_file
-from flask_mysqldb import MySQL
+from flask import Flask, render_template, request, redirect, url_for, flash, send_file, g
+import pymysql
 import pandas as pd
 from io import BytesIO
 import datetime
 import xlsxwriter
+import os
 
 app = Flask(__name__)
 
 # Configuration MySQL
-app.config['MYSQL_HOST'] = 'port'
-app.config['MYSQL_USER'] = 'root'
-app.config['MYSQL_PASSWORD'] = ''
-app.config['MYSQL_DB'] = 'gestion_enseignement'
-app.config['MYSQL_CURSORCLASS'] = 'DictCursor'
+app.config['MYSQL_HOST'] = os.environ.get('MYSQL_HOST', 'localhost')
+app.config['MYSQL_USER'] = os.environ.get('MYSQL_USER', 'root')
+app.config['MYSQL_PASSWORD'] = os.environ.get('MYSQL_PASSWORD', '')
+app.config['MYSQL_DB'] = os.environ.get('MYSQL_DB', 'gestion_enseignement')
+app.config['MYSQL_PORT'] = int(os.environ.get('MYSQL_PORT', 3306))
+app.secret_key = os.environ.get('SECRET_KEY', 'votre_cle_secrete_ici')
 
 
-mysql = MySQL(app)
+def get_db():
+    """Crée une connexion à la base de données"""
+    if 'db' not in g:
+        g.db = pymysql.connect(
+            host=app.config['MYSQL_HOST'],
+            user=app.config['MYSQL_USER'],
+            password=app.config['MYSQL_PASSWORD'],
+            database=app.config['MYSQL_DB'],
+            port=app.config['MYSQL_PORT'],
+            cursorclass=pymysql.cursors.DictCursor,
+            autocommit=False
+        )
+    return g.db
+
+
+@app.teardown_appcontext
+def close_db(error):
+    """Ferme la connexion à la base de données"""
+    db = g.pop('db', None)
+    if db is not None:
+        db.close()
+
 
 # Page d'accueil - Tableau de bord
 @app.route('/')
 def tableau_de_bord():
-    curseur = mysql.connection.cursor()
+    db = get_db()
+    curseur = db.cursor()
 
     # Récupération des modules avec calculs
     curseur.execute("""
@@ -54,7 +78,8 @@ def tableau_de_bord():
 # Gestion des établissements
 @app.route('/ecoles')
 def gestion_ecoles():
-    curseur = mysql.connection.cursor()
+    db = get_db()
+    curseur = db.cursor()
 
     # Récupération des établissements avec montants totaux
     curseur.execute("""
@@ -98,7 +123,8 @@ def finances_ecoles():
     # Déterminer la direction de l'ordre
     ordre_sql = 'ASC' if ordre == 'asc' else 'DESC'
 
-    curseur = mysql.connection.cursor()
+    db = get_db()
+    curseur = db.cursor()
 
     # Base query with filtering
     base_query = """
@@ -150,7 +176,8 @@ def finances_ecoles():
 # Ajouter un établissement
 @app.route('/ajouter-ecole', methods=['GET', 'POST'])
 def ajouter_ecole():
-    curseur = mysql.connection.cursor()
+    db = get_db()
+    curseur = db.cursor()
     if request.method == 'POST':
         nom = request.form['nom']
         type_etablissement = request.form['type_etablissement']
@@ -165,7 +192,7 @@ def ajouter_ecole():
             INSERT INTO ecoles (nom, type_etablissement, ville, contact, telephone, volume_cm, volume_td, volume_tp)
             VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
         """, (nom, type_etablissement, ville, contact, telephone, volume_cm, volume_td, volume_tp))
-        mysql.connection.commit()
+        db.commit()
         curseur.close()
 
         flash('Établissement ajouté avec succès!', 'success')
@@ -180,7 +207,8 @@ def ajouter_ecole():
 # Modifier un établissement
 @app.route('/edit-ecole/<int:ecole_id>', methods=['GET', 'POST'])
 def edit_ecole(ecole_id):
-    curseur = mysql.connection.cursor()
+    db = get_db()
+    curseur = db.cursor()
     if request.method == 'POST':
         nom = request.form['nom']
         type_etablissement = request.form['type_etablissement']
@@ -195,11 +223,11 @@ def edit_ecole(ecole_id):
             UPDATE ecoles SET nom=%s, type_etablissement=%s, ville=%s, contact=%s, telephone=%s, volume_cm=%s, volume_td=%s, volume_tp=%s
             WHERE id=%s
         """, (nom, type_etablissement, ville, contact, telephone, volume_cm, volume_td, volume_tp, ecole_id))
-        mysql.connection.commit()
+        db.commit()
 
         # Mettre à jour tous les modules de cette école avec les nouveaux volumes
         curseur.execute("UPDATE modules SET volume_cm = %s, volume_td = %s, volume_tp = %s, volume_total = %s, montant_total = volume_total * montant_heure WHERE ecole_id = %s", (volume_cm, volume_td, volume_tp, volume_cm + volume_td + volume_tp, ecole_id))
-        mysql.connection.commit()
+        db.commit()
 
         curseur.close()
 
@@ -219,9 +247,10 @@ def edit_ecole(ecole_id):
 # Supprimer un établissement
 @app.route('/delete-ecole/<int:ecole_id>')
 def delete_ecole(ecole_id):
-    curseur = mysql.connection.cursor()
+    db = get_db()
+    curseur = db.cursor()
     curseur.execute("DELETE FROM ecoles WHERE id = %s", (ecole_id,))
-    mysql.connection.commit()
+    db.commit()
     curseur.close()
     flash('Établissement supprimé avec succès!', 'success')
     return redirect('/ecoles')
@@ -229,7 +258,8 @@ def delete_ecole(ecole_id):
 # Gestion des volumes par niveau pour une école
 @app.route('/ecole/<int:ecole_id>/volumes-niveau', methods=['GET', 'POST'])
 def gestion_volumes_niveau(ecole_id):
-    curseur = mysql.connection.cursor()
+    db = get_db()
+    curseur = db.cursor()
 
     if request.method == 'POST':
         # Récupérer tous les modules de l'école
@@ -249,7 +279,7 @@ def gestion_volumes_niveau(ecole_id):
                 WHERE id = %s
             """, (volume_cm, volume_td, volume_tp, volume_total, module_id))
 
-        mysql.connection.commit()
+        db.commit()
         flash('Volumes des modules mis à jour avec succès!', 'success')
         return redirect(f'/ecole/{ecole_id}/volumes-niveau')
 
@@ -275,7 +305,8 @@ def gestion_volumes_niveau(ecole_id):
 # Gestion des volumes par niveau - Interface standalone
 @app.route('/gestion-volumes-niveau')
 def gestion_volumes_niveau_standalone():
-    curseur = mysql.connection.cursor()
+    db = get_db()
+    curseur = db.cursor()
     curseur.execute("SELECT id, nom FROM ecoles ORDER BY nom")
     ecoles = curseur.fetchall()
     curseur.close()
@@ -291,7 +322,8 @@ def export_page():
 # Modifier un module
 @app.route('/edit-module/<int:module_id>', methods=['GET', 'POST'])
 def edit_module(module_id):
-    curseur = mysql.connection.cursor()
+    db = get_db()
+    cur = db.cursor()
 
     if request.method == 'POST':
         # Récupération des données
@@ -317,7 +349,7 @@ def edit_module(module_id):
                     INSERT INTO ecoles (nom, type_etablissement, ville, contact)
                     VALUES (%s, %s, %s, %s)
                 """, (new_ecole_nom, new_ecole_type, new_ecole_ville, new_ecole_contact))
-                mysql.connection.commit()
+                db.commit()
                 ecole_id = cur.lastrowid
             else:
                 flash('Nom de l\'établissement requis pour un nouvel ajout.', 'danger')
@@ -336,7 +368,7 @@ def edit_module(module_id):
         """, (nom_module, ecole_id, niveau, volume_cm, volume_td, volume_tp,
               volume_total, montant_heure, montant_total, annee_universitaire, module_id))
 
-        mysql.connection.commit()
+        db.commit()
 
         # Mettre à jour les volumes par niveau pour l'école
         cur.execute("""
@@ -361,7 +393,7 @@ def edit_module(module_id):
                 VALUES (%s, %s, %s, %s, %s)
             """, (ecole_id, niveau, totals['total_cm'] or 0, totals['total_td'] or 0, totals['total_tp'] or 0))
 
-        mysql.connection.commit()
+        db.commit()
         flash('Module modifié avec succès!', 'success')
         return redirect('/')
 
@@ -379,9 +411,10 @@ def edit_module(module_id):
 # Supprimer un module
 @app.route('/delete-module/<int:module_id>')
 def delete_module(module_id):
-    cur = mysql.connection.cursor()
+    db = get_db()
+    cur = db.cursor()
     cur.execute("DELETE FROM modules WHERE id = %s", (module_id,))
-    mysql.connection.commit()
+    db.commit()
     cur.close()
     flash('Module supprimé avec succès!', 'success')
     return redirect('/')
@@ -389,7 +422,8 @@ def delete_module(module_id):
 # Détails d'un module
 @app.route('/module/<int:module_id>')
 def module_details(module_id):
-    cur = mysql.connection.cursor()
+    db = get_db()
+    cur = db.cursor()
 
     # Récupération du module
     cur.execute("""
@@ -410,7 +444,8 @@ def module_details(module_id):
 # Ajouter un module
 @app.route('/ajouter-module', methods=['GET', 'POST'])
 def ajouter_module():
-    cur = mysql.connection.cursor()
+    db = get_db()
+    cur = db.cursor()
 
     if request.method == 'POST':
         # Récupération des données
@@ -436,7 +471,7 @@ def ajouter_module():
                     INSERT INTO ecoles (nom, type_etablissement, ville, contact)
                     VALUES (%s, %s, %s, %s)
                 """, (new_ecole_nom, new_ecole_type, new_ecole_ville, new_ecole_contact))
-                mysql.connection.commit()
+                db.commit()
                 ecole_id = cur.lastrowid  # Récupérer l'ID de l'établissement nouvellement créé
             else:
                 flash('Nom de l\'établissement requis pour un nouvel ajout.', 'danger')
@@ -455,7 +490,7 @@ def ajouter_module():
         """, (nom_module, ecole_id, niveau, volume_cm, volume_td, volume_tp,
               volume_total, montant_heure, montant_total, annee_universitaire))
 
-        mysql.connection.commit()
+        db.commit()
         flash('Module ajouté avec succès!', 'success')
         return redirect('/')
 
@@ -469,7 +504,8 @@ def ajouter_module():
 # Gestion des paiements
 @app.route('/module/<int:module_id>/paiements')
 def gestion_paiements(module_id):
-    cur = mysql.connection.cursor()
+    db = get_db()
+    cur = db.cursor()
     
     # Récupération du module
     cur.execute("""
@@ -495,7 +531,8 @@ def ajouter_paiement():
     type_paiement = request.form['type_paiement']
     reference = request.form['reference']
 
-    cur = mysql.connection.cursor()
+    db = get_db()
+    cur = db.cursor()
 
     # Calculer le total des paiements pour le module
     cur.execute("SELECT SUM(montant) as total_percu FROM paiements WHERE module_id = %s", (module_id,))
@@ -527,7 +564,7 @@ def ajouter_paiement():
         VALUES (%s, %s, %s, %s, CURDATE(), %s)
     """, (module_id, montant, type_paiement, reference, statut))
 
-    mysql.connection.commit()
+    db.commit()
     cur.close()
 
     flash('Paiement enregistré avec succès!', 'success')
@@ -536,7 +573,8 @@ def ajouter_paiement():
 # Modifier un paiement
 @app.route('/edit-paiement/<int:paiement_id>', methods=['GET', 'POST'])
 def edit_paiement(paiement_id):
-    cur = mysql.connection.cursor()
+    db = get_db()
+    cur = db.cursor()
     if request.method == 'POST':
         montant = float(request.form['montant'])
         type_paiement = request.form['type_paiement']
@@ -569,7 +607,7 @@ def edit_paiement(paiement_id):
             UPDATE paiements SET montant=%s, type_paiement=%s, reference=%s, date_paiement=%s, statut=%s
             WHERE id=%s
         """, (montant, type_paiement, reference, date_paiement, statut, paiement_id))
-        mysql.connection.commit()
+        db.commit()
         cur.close()
 
         flash('Paiement modifié avec succès!', 'success')
@@ -588,13 +626,14 @@ def edit_paiement(paiement_id):
 # Supprimer un paiement
 @app.route('/delete-paiement/<int:paiement_id>')
 def delete_paiement(paiement_id):
-    cur = mysql.connection.cursor()
+    db = get_db()
+    cur = db.cursor()
     cur.execute("SELECT module_id FROM paiements WHERE id = %s", (paiement_id,))
     paiement = cur.fetchone()
     if paiement:
         module_id = paiement['module_id']
         cur.execute("DELETE FROM paiements WHERE id = %s", (paiement_id,))
-        mysql.connection.commit()
+        db.commit()
         cur.close()
         flash('Paiement supprimé avec succès!', 'success')
         return redirect(f'/module/{module_id}/paiements')
@@ -611,7 +650,8 @@ def delete_paiement(paiement_id):
 # Export Excel
 @app.route('/export/excel')
 def export_excel():
-    cur = mysql.connection.cursor()
+    db = get_db()
+    cur = db.cursor()
     
     # Récupération des données complètes
     cur.execute("""
@@ -661,7 +701,8 @@ def export_pdf():
     from reportlab.lib.utils import ImageReader
     import io
     
-    cur = mysql.connection.cursor()
+    db = get_db()
+    cur = db.cursor()
     cur.execute("""
         SELECT m.nom_module, e.nom as ecole, m.niveau, m.montant_total,
                COALESCE(SUM(p.montant), 0) as montant_percu
@@ -707,7 +748,8 @@ def export_pdf():
 
 @app.route('/add-sample-data')
 def add_sample_data():
-    cur = mysql.connection.cursor()
+    db = get_db()
+    cur = db.cursor()
 
     # Insert school
     cur.execute("INSERT INTO ecoles (nom, type_etablissement, ville, contact, telephone) VALUES (%s, %s, %s, %s, %s)", ('Ecole A', 'Université', 'Ville A', 'Contact A', '123456'))
@@ -720,11 +762,11 @@ def add_sample_data():
     # Insert payment
     cur.execute("INSERT INTO paiements (module_id, montant, type_paiement, reference, date_paiement, statut) VALUES (%s, %s, %s, %s, CURDATE(), %s)", (module_id, 50000, 'Virement', 'REF1', 'partiel'))
 
-    mysql.connection.commit()
+    db.commit()
     cur.close()
 
     return "Sample data added"
 
 if __name__ == '__main__':
-    app.secret_key = 'votre_cle_secrete'  # Clé secrète pour activer les sessions et flash messages
-    app.run(host="0.0.0.0" , port="port")
+    port = int(os.environ.get('PORT', 5000))
+    app.run(host="0.0.0.0", port=port)

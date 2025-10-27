@@ -1,6 +1,2 @@
-# Fichier : nixpacks.toml
-
-[phases.setup]
-# Ajoute les paquets système (APT, etc.) dont ton app a besoin.
-# Pour 'mysqlclient' ou 'flask_mysqldb', il faut le connecteur C.
-pkgs = ["mariadb-connector-c"]
+# Nixpacks configuration for Railway deployment
+# No system packages needed - using pure Python MySQL client (PyMySQL)
