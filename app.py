@@ -40,11 +40,77 @@ def close_db(error):
         db.close()
 
 
+# Health check endpoint
+@app.route('/health')
+def health_check():
+    """Endpoint de santé pour vérifier que l'application fonctionne"""
+    try:
+        db = get_db()
+        cursor = db.cursor()
+        cursor.execute("SELECT 1")
+        cursor.close()
+        return {
+            "status": "healthy",
+            "database": "connected",
+            "message": "Application is running correctly"
+        }, 200
+    except Exception as e:
+        return {
+            "status": "unhealthy",
+            "database": "disconnected",
+            "error": str(e),
+            "message": "Database connection failed. Check MYSQL_* environment variables in Railway."
+        }, 503
+
 # Page d'accueil - Tableau de bord
 @app.route('/')
 def tableau_de_bord():
-    db = get_db()
-    curseur = db.cursor()
+    try:
+        db = get_db()
+        curseur = db.cursor()
+    except Exception as e:
+        error_msg = "La base de données n'est pas accessible. Veuillez configurer les variables d'environnement MySQL dans Railway."
+        return f"""
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <title>Configuration Requise</title>
+            <style>
+                body {{ font-family: Arial, sans-serif; max-width: 800px; margin: 50px auto; padding: 20px; }}
+                .error {{ background: #fee; border: 2px solid #c33; padding: 20px; border-radius: 5px; }}
+                .info {{ background: #eff; border: 2px solid #36c; padding: 20px; border-radius: 5px; margin-top: 20px; }}
+                h1 {{ color: #c33; }}
+                code {{ background: #f5f5f5; padding: 2px 5px; border-radius: 3px; }}
+            </style>
+        </head>
+        <body>
+            <div class="error">
+                <h1>⚠️ Configuration MySQL Requise</h1>
+                <p>{error_msg}</p>
+                <p><strong>Erreur:</strong> {str(e)}</p>
+            </div>
+            <div class="info">
+                <h2>📋 Étapes de Configuration</h2>
+                <ol>
+                    <li>Dans Railway Dashboard, cliquez sur <strong>+ New</strong></li>
+                    <li>Sélectionnez <strong>Database → MySQL</strong></li>
+                    <li>Railway configurera automatiquement les variables d'environnement</li>
+                    <li>Connectez-vous à MySQL et importez <code>database.sql</code></li>
+                    <li>Redéployez cette application</li>
+                </ol>
+                <h3>Variables Requises:</h3>
+                <ul>
+                    <li><code>MYSQL_HOST</code></li>
+                    <li><code>MYSQL_USER</code></li>
+                    <li><code>MYSQL_PASSWORD</code></li>
+                    <li><code>MYSQL_DB</code></li>
+                    <li><code>MYSQL_PORT</code></li>
+                    <li><code>SECRET_KEY</code></li>
+                </ul>
+            </div>
+        </body>
+        </html>
+        """, 503
 
     # Récupération des modules avec calculs
     curseur.execute("""
