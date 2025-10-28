@@ -7,3 +7,5 @@ class Config:
     MYSQL_DB = os.environ.get('MYSQL_DB', 'gestion_enseignement')
     MYSQL_PORT = int(os.environ.get('MYSQL_PORT', 3306))
     SECRET_KEY = os.environ.get('SECRET_KEY', 'votre_cle_secrete_ici')
+    
+    
