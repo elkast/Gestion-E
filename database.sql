@@ -6,7 +6,7 @@ CREATE TABLE ecoles (
     ville VARCHAR(100),
     contact VARCHAR(255),
     telephone VARCHAR(20),
-    volume_cm DECIMAL(8,2) DEFAULT 0,
+    telephone DECIMAL(8,2) DEFAULT 0,
     volume_td DECIMAL(8,2) DEFAULT 0,
     volume_tp DECIMAL(8,2) DEFAULT 0,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
