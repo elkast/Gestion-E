@@ -20,3 +20,4 @@ xlsxwriter==3.2.9
 cryptography==44.0.0
 gunicorn==23.0.0
 python-dotenv==1.0.1
+pywebview==5.3

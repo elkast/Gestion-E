@@ -9,58 +9,29 @@
 <body>
     <div class="container mt-4">
         <div class="row justify-content-center">
-            <div class="col-md-8">
+            <div class="col-md-10">
                 <div class="card">
-                    <div class="card-header" >
+                    <div class="card-header">
                         <h4 style="color: white;">➕ Nouveau Module d'Enseignement</h4>
                     </div>
                     <div class="card-body">
                         <form method="POST">
-                            <div class="row">
-                                <div class="col-md-6">
-                                    <div class="mb-3">
-                                        <label class="form-label">Nom du Module *</label>
-                                        <input type="text" class="form-control" name="nom_module" required>
-                                    </div>
+                            <!-- Informations générales du module -->
+                            <div class="row mb-4">
+                                <div class="col-12">
+                                    <h5 class="text-primary mb-3">📚 Informations du Module</h5>
                                 </div>
                                 <div class="col-md-6">
                                     <div class="mb-3">
-                                        <label class="form-label">Établissement *</label>
-                                    <select class="form-select" name="ecole_id" id="ecoleSelect" required onchange="toggleNewEcoleInput()">
-                                        <option value="">Sélectionner un établissement</option>
-                                        {% for ecole in ecoles %}
-                                        <option value="{{ ecole.id }}">{{ ecole.nom }}</option>
-                                        {% endfor %}
-                                        <option value="new">➕ Ajouter un nouvel établissement</option>
-                                    </select>
-                                    <div id="newEcoleFields" style="display:none; margin-top:10px;">
-                                        <input type="text" class="form-control mb-2" name="new_ecole_nom" placeholder="Nom de l'établissement">
-                                        <input type="text" class="form-control mb-2" name="new_ecole_type" placeholder="Type d'établissement">
-                                        <input type="text" class="form-control mb-2" name="new_ecole_ville" placeholder="Ville">
-                                        <input type="text" class="form-control mb-2" name="new_ecole_contact" placeholder="Contact">
-                                    </div>
-                                    <script>
-                                        function toggleNewEcoleInput() {
-                                            var select = document.getElementById('ecoleSelect');
-                                            var newFields = document.getElementById('newEcoleFields');
-                                            if (select.value === 'new') {
-                                                newFields.style.display = 'block';
-                                                select.removeAttribute('required');
-                                            } else {
-                                                newFields.style.display = 'none';
-                                                select.setAttribute('required', 'required');
-                                            }
-                                        }
-                                    </script>
+                                        <label class="form-label fw-bold">Nom du Module *</label>
+                                        <input type="text" class="form-control" name="nom_module" required placeholder="Ex: Algorithmes et Structures de Données">
                                     </div>
                                 </div>
-                            </div>
-
-                            <div class="row">
-                                <div class="col-md-6">
+                                <div class="col-md-3">
                                     <div class="mb-3">
-                                        <label class="form-label">Niveau *</label>
+                                        <label class="form-label fw-bold">Niveau *</label>
                                         <select class="form-select" name="niveau" required>
+                                            <option value="">Choisir...</option>
                                             <option value="Licence 1">Licence 1</option>
                                             <option value="Licence 2">Licence 2</option>
                                             <option value="Licence 3">Licence 3</option>
@@ -70,9 +41,9 @@
                                         </select>
                                     </div>
                                 </div>
-                                <div class="col-md-6">
+                                <div class="col-md-3">
                                     <div class="mb-3">
-                                        <label class="form-label">Année Universitaire *</label>
+                                        <label class="form-label fw-bold">Année Universitaire *</label>
                                         <select class="form-select" name="annee_universitaire" required>
                                             <option value="2023-2024">2023-2024</option>
                                             <option value="2024-2025" selected>2024-2025</option>
@@ -82,50 +53,154 @@
                                 </div>
                             </div>
 
+                            <!-- Informations de l'établissement -->
+                            <div class="row mb-4">
+                                <div class="col-12">
+                                    <h5 class="text-primary mb-3">🏫 Établissement</h5>
+                                </div>
+                                <div class="col-md-12">
+                                    <div class="mb-3">
+                                        <label class="form-label fw-bold">Établissement *</label>
+                                        <select class="form-select" name="ecole_id" id="ecoleSelect" required>
+                                            <option value="">Sélectionner un établissement existant</option>
+                                            {% for ecole in ecoles %}
+                                            <option value="{{ ecole.id }}">{{ ecole.nom }} ({{ ecole.type_etablissement or 'N/A' }}, {{ ecole.ville or 'N/A' }})</option>
+                                            {% endfor %}
+                                            <option value="new">➕ Ajouter un nouvel établissement</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Nouveau établissement (masqué par défaut) -->
+                            <div class="row mb-4" id="newEcoleFields" style="display: none;">
+                                <div class="col-12">
+                                    <h6 class="text-primary mb-3">📝 Détails du Nouvel Établissement</h6>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="mb-3">
+                                        <label class="form-label fw-bold">Nom de l'établissement *</label>
+                                        <input type="text" class="form-control" name="new_ecole_nom" placeholder="Université de...">
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="mb-3">
+                                        <label class="form-label fw-bold">Type d'établissement *</label>
+                                        <input type="text" class="form-control" name="new_ecole_type" placeholder="Université, IUT, etc.">
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="mb-3">
+                                        <label class="form-label fw-bold">Ville *</label>
+                                        <input type="text" class="form-control" name="new_ecole_ville" placeholder="Ville">
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="mb-3">
+                                        <label class="form-label fw-bold">Contact</label>
+                                        <input type="text" class="form-control" name="new_ecole_contact" placeholder="Email ou téléphone">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Volumes horaires -->
+                            <div class="row mb-4">
+                                <div class="col-12">
+                                    <h5 class="text-primary mb-3">⏰ Volumes Horaires</h5>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="card border-info">
+                                        <div class="card-body text-center">
+                                            <h6 class="card-title text-info">Cours Magistral (CM)</h6>
+                                            <div class="mb-2">
+                                                <label class="form-label small">Volume (heures)</label>
+                                                <input type="number" class="form-control" name="volume_cm" step="0.5" min="0" value="0">
+                                            </div>
+                                            <div>
+                                                <label class="form-label small">Tarif horaire (FCFA)</label>
+                                                <input type="number" class="form-control" name="tarif_cm" min="0" step="100" value="0">
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="card border-success">
+                                        <div class="card-body text-center">
+                                            <h6 class="card-title text-success">Travaux Dirigés (TD)</h6>
+                                            <div class="mb-2">
+                                                <label class="form-label small">Volume (heures)</label>
+                                                <input type="number" class="form-control" name="volume_td" step="0.5" min="0" value="0">
+                                            </div>
+                                            <div>
+                                                <label class="form-label small">Tarif horaire (FCFA)</label>
+                                                <input type="number" class="form-control" name="tarif_td" min="0" step="100" value="0">
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="card border-warning">
+                                        <div class="card-body text-center">
+                                            <h6 class="card-title text-warning">Travaux Pratiques (TP)</h6>
+                                            <div class="mb-2">
+                                                <label class="form-label small">Volume (heures)</label>
+                                                <input type="number" class="form-control" name="volume_tp" step="0.5" min="0" value="0">
+                                            </div>
+                                            <div>
+                                                <label class="form-label small">Tarif horaire (FCFA)</label>
+                                                <input type="number" class="form-control" name="tarif_tp" min="0" step="100" value="0">
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Résumé et calculs -->
+                            <div class="row mb-4">
+                                <div class="col-12">
+                                    <h5 class="text-primary mb-3">📊 Résumé Financier</h5>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="card bg-light border-primary">
+                                        <div class="card-body text-center">
+                                            <h6 class="card-title text-primary">Volume Total</h6>
+                                            <h4 class="text-primary" id="volume_total_display">0.0 h</h4>
+                                            <small class="text-muted">heures</small>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="card bg-light border-success">
+                                        <div class="card-body text-center">
+                                            <h6 class="card-title text-success">Montant Total</h6>
+                                            <h4 class="text-success" id="montant_total_display">0 FCFA</h4>
+                                            <small class="text-muted">montant brut</small>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="card bg-light border-info">
+                                        <div class="card-body text-center">
+                                            <h6 class="card-title text-info">Tarif Horaire Total</h6>
+                                            <h4 class="text-info" id="tarif_total_display">0 FCFA</h4>
+                                            <small class="text-muted">somme des tarifs</small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Actions -->
                             <div class="row">
-                                <div class="col-md-4">
-                                    <div class="mb-3">
-                                        <label class="form-label">Volume CM (heures)</label>
-                                        <input type="number" class="form-control" name="volume_cm" id="volume_cm" step="0.5" value="0">
+                                <div class="col-12">
+                                    <div class="d-flex gap-2 justify-content-center">
+                                        <button type="submit" class="btn btn-success btn-lg">
+                                            <i class="fas fa-save"></i> Enregistrer le Module
+                                        </button>
+                                        <a href="/" class="btn btn-outline-secondary btn-lg">
+                                            <i class="fas fa-arrow-left"></i> Retour au Tableau de Bord
+                                        </a>
                                     </div>
                                 </div>
-                                <div class="col-md-4">
-                                    <div class="mb-3">
-                                        <label class="form-label">Volume TD (heures)</label>
-                                        <input type="number" class="form-control" name="volume_td" id="volume_td" step="0.5" value="0">
-                                    </div>
-                                </div>
-                                <div class="col-md-4">
-                                    <div class="mb-3">
-                                        <label class="form-label">Volume TP (heures)</label>
-                                        <input type="number" class="form-control" name="volume_tp" id="volume_tp" step="0.5" value="0">
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="row">
-                                <div class="col-md-6">
-                                    <div class="mb-3">
-                                        <label class="form-label">Volume Horaire Total (heures)</label>
-                                        <input type="text" class="form-control" id="volume_total_display" readonly value="0.0">
-                                    </div>
-                                </div>
-                                <div class="col-md-6">
-                                    <div class="mb-3">
-                                        <label class="form-label">Tarif Horaire (FCFA) *</label>
-                                        <input type="number" class="form-control" name="montant_heure" id="montant_heure" required min="0" step="100">
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="mb-3">
-                                <label class="form-label">Montant Total Calculé (FCFA)</label>
-                                <input type="text" class="form-control" id="montant_total_display" readonly value="0">
-                            </div>
-
-                            <div class="d-grid gap-2">
-                                <button type="submit" class="btn btn-primary">Enregistrer le Module</button>
-                                <a href="/" class="btn btn-secondary">Retour au Tableau de Bord</a>
                             </div>
                         </form>
                     </div>
@@ -136,25 +211,41 @@
 
     <script>
         function calculateTotals() {
-            const cm = parseFloat(document.getElementById('volume_cm').value) || 0;
-            const td = parseFloat(document.getElementById('volume_td').value) || 0;
-            const tp = parseFloat(document.getElementById('volume_tp').value) || 0;
-            const tarif = parseFloat(document.getElementById('montant_heure').value) || 0;
+            // Get values
+            const volume_cm = parseFloat(document.querySelector('input[name="volume_cm"]').value) || 0;
+            const volume_td = parseFloat(document.querySelector('input[name="volume_td"]').value) || 0;
+            const volume_tp = parseFloat(document.querySelector('input[name="volume_tp"]').value) || 0;
+            const tarif_cm = parseFloat(document.querySelector('input[name="tarif_cm"]').value) || 0;
+            const tarif_td = parseFloat(document.querySelector('input[name="tarif_td"]').value) || 0;
+            const tarif_tp = parseFloat(document.querySelector('input[name="tarif_tp"]').value) || 0;
 
-            const volumeTotal = cm + td + tp;
-            const montantTotal = volumeTotal * tarif;
+            // Calculate totals
+            const volume_total = volume_cm + volume_td + volume_tp;
+            const montant_total = (volume_cm * tarif_cm) + (volume_td * tarif_td) + (volume_tp * tarif_tp);
+            const tarif_total = tarif_cm + tarif_td + tarif_tp;
 
-            document.getElementById('volume_total_display').value = volumeTotal.toFixed(1);
-            document.getElementById('montant_total_display').value = montantTotal.toLocaleString('fr-FR');
+            // Update display
+            document.getElementById('volume_total_display').textContent = volume_total.toFixed(1) + ' h';
+            document.getElementById('montant_total_display').textContent = montant_total.toLocaleString('fr-FR') + ' FCFA';
+            document.getElementById('tarif_total_display').textContent = tarif_total.toLocaleString('fr-FR') + ' FCFA';
         }
 
-        // Ajouter des écouteurs d'événements aux entrées de volume et de tarif
-        document.getElementById('volume_cm').addEventListener('input', calculateTotals);
-        document.getElementById('volume_td').addEventListener('input', calculateTotals);
-        document.getElementById('volume_tp').addEventListener('input', calculateTotals);
-        document.getElementById('montant_heure').addEventListener('input', calculateTotals);
+        // Add event listeners to all numeric inputs
+        document.querySelectorAll('input[type="number"]').forEach(input => {
+            input.addEventListener('input', calculateTotals);
+        });
 
-        // Calcul initial
+        // Toggle new school fields visibility
+        document.getElementById('ecoleSelect').addEventListener('change', function() {
+            const newEcoleFields = document.getElementById('newEcoleFields');
+            if (this.value === 'new') {
+                newEcoleFields.style.display = 'block';
+            } else {
+                newEcoleFields.style.display = 'none';
+            }
+        });
+
+        // Initial calculation
         calculateTotals();
     </script>
 </body>

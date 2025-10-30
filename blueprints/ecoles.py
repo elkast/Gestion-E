@@ -1,25 +1,7 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash, g
-import pymysql
-import os
-from dotenv import load_dotenv
-
-load_dotenv()
+from .db import get_db
 
 schools_bp = Blueprint('schools', __name__)
-
-def get_db():
-    """Crée une connexion à la base de données"""
-    if 'db' not in g:
-        g.db = pymysql.connect(
-            host=os.environ.get('MYSQL_HOST', 'localhost'),
-            user=os.environ.get('MYSQL_USER', 'root'),
-            password=os.environ.get('MYSQL_PASSWORD', ''),
-            database=os.environ.get('MYSQL_DB', 'gestion_enseignement'),
-            port=int(os.environ.get('MYSQL_PORT', 3306)),
-            cursorclass=pymysql.cursors.DictCursor,
-            autocommit=False
-        )
-    return g.db
 
 # Gestion des établissements
 @schools_bp.route('/ecoles')
@@ -167,7 +149,7 @@ def edit_ecole(ecole_id):
         db.commit()
 
         # Mettre à jour tous les modules de cette école avec les nouveaux volumes
-        curseur.execute("UPDATE modules SET volume_cm = %s, volume_td = %s, volume_tp = %s, volume_total = %s, montant_total = volume_total * montant_heure WHERE ecole_id = %s", (volume_cm, volume_td, volume_tp, volume_cm + volume_td + volume_tp, ecole_id))
+        curseur.execute("UPDATE modules SET volume_cm = %s, volume_td = %s, volume_tp = %s, volume_total = %s, montant_total = (volume_cm * tarif_cm) + (volume_td * tarif_td) + (volume_tp * tarif_tp) WHERE ecole_id = %s", (volume_cm, volume_td, volume_tp, volume_cm + volume_td + volume_tp, ecole_id))
         db.commit()
 
         curseur.close()
@@ -215,7 +197,7 @@ def gestion_volumes_niveau(ecole_id):
 
             # Mettre à jour le module
             curseur.execute("""
-                UPDATE modules SET volume_cm = %s, volume_td = %s, volume_tp = %s, volume_total = %s, montant_total = volume_total * montant_heure
+                UPDATE modules SET volume_cm = %s, volume_td = %s, volume_tp = %s, volume_total = %s, montant_total = (volume_cm * tarif_cm) + (volume_td * tarif_td) + (volume_tp * tarif_tp)
                 WHERE id = %s
             """, (volume_cm, volume_td, volume_tp, volume_total, module_id))
 

@@ -26,32 +26,19 @@
                                 <div class="col-md-6">
                                     <div class="mb-3">
                                         <label class="form-label">Établissement *</label>
-                                        <select class="form-select" name="ecole_id" id="ecoleSelect" required onchange="toggleNewEcoleInput()">
+                                        <select class="form-select" name="ecole_id" id="ecoleSelect" required>
                                             <option value="">Sélectionner un établissement</option>
                                             {% for ecole in ecoles %}
                                             <option value="{{ ecole.id }}" {% if ecole.id == module.ecole_id %}selected{% endif %}>{{ ecole.nom }}</option>
                                             {% endfor %}
                                             <option value="new">➕ Ajouter un nouvel établissement</option>
                                         </select>
-                                        <div id="newEcoleFields" style="display:none; margin-top:10px;">
+                                        <div id="newEcoleFields" style="margin-top:10px;">
                                             <input type="text" class="form-control mb-2" name="new_ecole_nom" placeholder="Nom de l'établissement">
                                             <input type="text" class="form-control mb-2" name="new_ecole_type" placeholder="Type d'établissement">
                                             <input type="text" class="form-control mb-2" name="new_ecole_ville" placeholder="Ville">
                                             <input type="text" class="form-control mb-2" name="new_ecole_contact" placeholder="Contact">
                                         </div>
-                                        <script>
-                                            function toggleNewEcoleInput() {
-                                                var select = document.getElementById('ecoleSelect');
-                                                var newFields = document.getElementById('newEcoleFields');
-                                                if (select.value === 'new') {
-                                                    newFields.style.display = 'block';
-                                                    select.removeAttribute('required');
-                                                } else {
-                                                    newFields.style.display = 'none';
-                                                    select.setAttribute('required', 'required');
-                                                }
-                                            }
-                                        </script>
                                     </div>
                                 </div>
                             </div>
@@ -104,23 +91,45 @@
                             </div>
 
                             <div class="row">
-                                <div class="col-md-6">
+                                <div class="col-md-4">
                                     <div class="mb-3">
-                                        <label class="form-label">Volume Horaire Total (heures)</label>
-                                        <input type="text" class="form-control" id="volume_total_display" readonly value="{{ module.volume_total }}">
+                                        <label class="form-label">Tarif Horaire CM (FCFA)</label>
+                                        <input type="number" class="form-control" name="tarif_cm" id="tarif_cm" min="0" step="100" value="{{ module.tarif_cm|default(0) }}">
                                     </div>
                                 </div>
-                                <div class="col-md-6">
+                                <div class="col-md-4">
                                     <div class="mb-3">
-                                        <label class="form-label">Tarif Horaire (FCFA) *</label>
-                                        <input type="number" class="form-control" name="montant_heure" id="montant_heure" value="{{ module.montant_heure }}" required min="0" step="100">
+                                        <label class="form-label">Tarif Horaire TD (FCFA)</label>
+                                        <input type="number" class="form-control" name="tarif_td" id="tarif_td" min="0" step="100" value="{{ module.tarif_td|default(0) }}">
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="mb-3">
+                                        <label class="form-label">Tarif Horaire TP (FCFA)</label>
+                                        <input type="number" class="form-control" name="tarif_tp" id="tarif_tp" min="0" step="100" value="{{ module.tarif_tp|default(0) }}">
                                     </div>
                                 </div>
                             </div>
 
-                            <div class="mb-3">
-                                <label class="form-label">Montant Total Calculé (FCFA)</label>
-                                <input type="text" class="form-control" id="montant_total_display" readonly value="{{ module.montant_total }}">
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <div class="mb-3">
+                                        <label class="form-label">Volume Horaire Total (heures)</label>
+                                        <input type="text" class="form-control" id="volume_total_display" readonly value="{{ volume_total|default(module.volume_total) }}">
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="mb-3">
+                                        <label class="form-label">Montant Total (FCFA)</label>
+                                        <input type="text" class="form-control" id="montant_total_display" readonly value="{{ montant_total|default(module.montant_total) }}">
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="mb-3">
+                                        <label class="form-label">Tarif Horaire Moyen (FCFA)</label>
+                                        <input type="text" class="form-control" id="montant_heure_display" readonly value="{{ montant_heure|default(module.montant_heure) }}">
+                                    </div>
+                                </div>
                             </div>
 
                             <div class="d-grid gap-2">
@@ -136,26 +145,32 @@
 
     <script>
         function calculateTotals() {
-            const cm = parseFloat(document.getElementById('volume_cm').value) || 0;
-            const td = parseFloat(document.getElementById('volume_td').value) || 0;
-            const tp = parseFloat(document.getElementById('volume_tp').value) || 0;
-            const tarif = parseFloat(document.getElementById('montant_heure').value) || 0;
+            const volume_cm = parseFloat(document.getElementById('volume_cm').value) || 0;
+            const volume_td = parseFloat(document.getElementById('volume_td').value) || 0;
+            const volume_tp = parseFloat(document.getElementById('volume_tp').value) || 0;
+            const tarif_cm = parseFloat(document.getElementById('tarif_cm').value) || 0;
+            const tarif_td = parseFloat(document.getElementById('tarif_td').value) || 0;
+            const tarif_tp = parseFloat(document.getElementById('tarif_tp').value) || 0;
 
-            const volumeTotal = cm + td + tp;
-            const montantTotal = volumeTotal * tarif;
+            const volume_total = volume_cm + volume_td + volume_tp;
+            const montant_total = (volume_cm * tarif_cm) + (volume_td * tarif_td) + (volume_tp * tarif_tp);
+            const montant_heure = volume_total > 0 ? montant_total / volume_total : 0;
 
-            document.getElementById('volume_total_display').value = volumeTotal.toFixed(1);
-            document.getElementById('montant_total_display').value = montantTotal.toLocaleString('fr-FR');
+            document.getElementById('volume_total_display').value = volume_total.toFixed(1);
+            document.getElementById('montant_total_display').value = montant_total.toFixed(0);
+            document.getElementById('montant_heure_display').value = montant_heure.toFixed(0);
         }
 
-        // Ajouter des écouteurs d'événements aux entrées de volume et de tarif
-        document.getElementById('volume_cm').addEventListener('input', calculateTotals);
-        document.getElementById('volume_td').addEventListener('input', calculateTotals);
-        document.getElementById('volume_tp').addEventListener('input', calculateTotals);
-        document.getElementById('montant_heure').addEventListener('input', calculateTotals);
-
-        // Calcul initial
-        calculateTotals();
+        // Add event listeners to all input fields
+        document.addEventListener('DOMContentLoaded', function() {
+            const inputs = ['volume_cm', 'volume_td', 'volume_tp', 'tarif_cm', 'tarif_td', 'tarif_tp'];
+            inputs.forEach(id => {
+                document.getElementById(id).addEventListener('input', calculateTotals);
+            });
+            // Calculate initial totals
+            calculateTotals();
+        });
     </script>
+
 </body>
 </html>

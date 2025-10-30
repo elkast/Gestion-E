@@ -4,9 +4,9 @@
 
 /* Variables personnalisées */
 :root {
-  --couleur-principale: #2b6cb0;
+  --couleur-principale: #1e40af; /* Bleu plus profond et amélioré */
   --couleur-secondaire: #4a5568;
-  --couleur-accent: #4299e1;
+  --couleur-accent: #3b82f6; /* Bleu plus vibrant */
   --couleur-succes: #48bb78;
   --couleur-danger: #f56565;
   --couleur-avertissement: #ed8936;
@@ -14,13 +14,15 @@
   --couleur-sombre: #2d3748;
   --couleur-arriere-plan: #f8fafc;
   --couleur-carte: #ffffff;
+  --bordure-couleur: #dbeafe; /* Bordure bleue claire */
+  --bordure-epaisseur: 2px;
   --ombre-petite: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);
   --ombre: 0 4px 6px rgba(0, 0, 0, 0.07), 0 1px 3px rgba(0, 0, 0, 0.1);
   --ombre-grande: 0 10px 15px rgba(0, 0, 0, 0.1), 0 4px 6px rgba(0, 0, 0, 0.05);
   --rayon-bordure: 12px;
   --rayon-bordure-petit: 8px;
   --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  --degrade-principal: linear-gradient(135deg, #bee3f8 0%, #90cdf4 100%);
+  --degrade-principal: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%); /* Dégradé bleu amélioré */
   --degrade-succes: linear-gradient(135deg, #c6f6d5 0%, #9ae6b4 100%);
 }
 
@@ -68,7 +70,7 @@ body {
 
 /* Cartes */
 .card {
-  border: none;
+  border: var(--bordure-epaisseur) solid var(--bordure-couleur);
   border-radius: var(--rayon-bordure);
   box-shadow: var(--ombre);
   background-color: var(--couleur-carte);
@@ -98,6 +100,7 @@ body {
   text-align: center;
   box-shadow: var(--ombre);
   border-left: 4px solid var(--couleur-accent);
+  border: var(--bordure-epaisseur) solid var(--bordure-couleur);
 }
 
 .stat-card:hover {
@@ -126,6 +129,7 @@ body {
   border-radius: var(--rayon-bordure);
   overflow: hidden;
   margin-bottom: 0;
+  border: var(--bordure-epaisseur) solid var(--bordure-couleur);
 }
 
 .table thead th {

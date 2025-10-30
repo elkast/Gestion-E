@@ -1,53 +1,56 @@
+import os
+import sys
+import threading
 from flask import Flask
 from config import Config
-from blueprints.principal import principal_bp, close_db
+from blueprints.principal import principal_bp
 from blueprints.ecoles import schools_bp
 from blueprints.paiements import payments_bp
+from blueprints.db import init_app
+import webview
 
-app = Flask(__name__)
+# --- Fonction pour gérer les chemins de PyInstaller ---
+def get_resource_path(relative_path):
+    """Détermine le chemin correct des ressources après la compilation par PyInstaller."""
+    try:
+        # Chemin lorsque l'application est compilée dans un exécutable
+        base_path = sys._MEIPASS
+    except Exception:
+        # Chemin lorsque l'application est exécutée normalement
+        base_path = os.path.abspath(os.path.dirname(__file__))
+    
+    return os.path.join(base_path, relative_path)
+
+# --- Initialisation de Flask et de la DB ---
+# Assurez-vous que vos dossiers sont nommés 'templates' et 'static'
+TEMPLATE_DIR = get_resource_path('templates')
+STATIC_DIR = get_resource_path('static')
+
+# Modifiez l'initialisation de Flask
+app = Flask(__name__, 
+            template_folder=TEMPLATE_DIR, 
+            static_folder=STATIC_DIR)
 app.config.from_object(Config)
+
+# GESTION DE VOTRE BASE DE DONNÉES (SQLite)
+DB_FILE = "gestion_enseignement.db"
+DB_PATH = get_resource_path(DB_FILE)
+app.config['SQLITE_DB'] = DB_PATH
+
+# Initialiser la gestion de la DB
+init_app(app)
 
 # Enregistrer les blueprints
 app.register_blueprint(principal_bp)
 app.register_blueprint(schools_bp)
 app.register_blueprint(payments_bp)
 
-# Enregistrer la fonction de fermeture de la DB
-app.teardown_appcontext(close_db)
-
-
-from flask import g
-import pymysql
-
-
-def get_db():
-    """Crée une connexion à la base de données"""
-    if 'db' not in g:
-        g.db = pymysql.connect(
-            host=app.config['MYSQL_HOST'],
-            user=app.config['MYSQL_USER'],
-            password=app.config['MYSQL_PASSWORD'],
-            database=app.config['MYSQL_DB'],
-            port=app.config['MYSQL_PORT'],
-            cursorclass=pymysql.cursors.DictCursor,
-            autocommit=False
-        )
-    return g.db
-
-
-@app.teardown_appcontext
-def close_db(error):
-    """Ferme la connexion à la base de données"""
-    db = g.pop('db', None)
-    if db is not None:
-        db.close()
-
-
 # Health check endpoint
 @app.route('/health')
 def health_check():
     """Endpoint de santé pour vérifier que l'application fonctionne"""
     try:
+        from blueprints.db import get_db
         db = get_db()
         cursor = db.cursor()
         cursor.execute("SELECT 1")
@@ -65,17 +68,10 @@ def health_check():
             "message": "Database connection failed. Check MYSQL_* environment variables in Railway."
         }, 503
 
-
-
-
-
-
-
-
-
-
-
 if __name__ == '__main__':
-    import os
-    port = int(os.environ.get('PORT', 5000))
-    app.run(host="127.0.0.1", port=port, debug=True)
+    # Le serveur Flask doit être lancé en premier dans un thread
+    threading.Thread(target=app.run, kwargs={'host': '127.0.0.1', 'port': 5000}).start()
+    
+    # Lance la fenêtre pywebview qui pointe vers le serveur local
+    webview.create_window('Zen Faskk', 'http://127.0.0.1:5000', width=1000, height=700)
+    webview.start()

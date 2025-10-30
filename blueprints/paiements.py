@@ -1,25 +1,7 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash, g
-import pymysql
-import os
-from dotenv import load_dotenv
-
-load_dotenv()
+from .db import get_db
 
 payments_bp = Blueprint('payments', __name__)
-
-def get_db():
-    """Crée une connexion à la base de données"""
-    if 'db' not in g:
-        g.db = pymysql.connect(
-            host=os.environ.get('MYSQL_HOST', 'localhost'),
-            user=os.environ.get('MYSQL_USER', 'root'),
-            password=os.environ.get('MYSQL_PASSWORD', ''),
-            database=os.environ.get('MYSQL_DB', 'gestion_enseignement'),
-            port=int(os.environ.get('MYSQL_PORT', 3306)),
-            cursorclass=pymysql.cursors.DictCursor,
-            autocommit=False
-        )
-    return g.db
 
 # Gestion des paiements
 @payments_bp.route('/module/<int:module_id>/paiements')

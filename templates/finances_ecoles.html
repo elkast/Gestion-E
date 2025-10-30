@@ -27,7 +27,7 @@
         <div class="card mt-4">
             <div class="card-header d-flex justify-content-between align-items-center">
                 <h5>💰 États Financiers par École</h5>
-                <form method="get" action="{{ url_for('finances_ecoles') }}" class="d-flex w-25">
+                <form method="get" action="{{ url_for('schools.finances_ecoles') }}" class="d-flex w-25">
                     <input type="text" name="search" value="{{ search }}" class="form-control" placeholder="Rechercher une école..." />
                     <button type="submit" class="btn btn-primary ms-2">Rechercher</button>
                 </form>
@@ -38,7 +38,7 @@
                         <thead class="table-dark">
                             <tr>
                                 <th scope="col">
-                                    <a href="{{ url_for('finances_ecoles', sort_by='nom_ecole', order='asc' if sort_by != 'nom_ecole' or order == 'desc' else 'desc', search=search, page=1) }}">
+                                    <a href="{{ url_for('schools.finances_ecoles', sort_by='nom_ecole', order='asc' if sort_by != 'nom_ecole' or order == 'desc' else 'desc', search=search, page=1) }}">
                                         École
                                         {% if sort_by == 'nom_ecole' %}
                                             {% if order == 'asc' %}▲{% else %}▼{% endif %}
@@ -46,7 +46,7 @@
                                     </a>
                                 </th>
                                 <th scope="col">
-                                    <a href="{{ url_for('finances_ecoles', sort_by='total_du', order='asc' if sort_by != 'total_du' or order == 'desc' else 'desc', search=search, page=1) }}">
+                                    <a href="{{ url_for('schools.finances_ecoles', sort_by='total_du', order='asc' if sort_by != 'total_du' or order == 'desc' else 'desc', search=search, page=1) }}">
                                         Total Dû
                                         {% if sort_by == 'total_du' %}
                                             {% if order == 'asc' %}▲{% else %}▼{% endif %}
@@ -54,7 +54,7 @@
                                     </a>
                                 </th>
                                 <th scope="col">
-                                    <a href="{{ url_for('finances_ecoles', sort_by='total_percu', order='asc' if sort_by != 'total_percu' or order == 'desc' else 'desc', search=search, page=1) }}">
+                                    <a href="{{ url_for('schools.finances_ecoles', sort_by='total_percu', order='asc' if sort_by != 'total_percu' or order == 'desc' else 'desc', search=search, page=1) }}">
                                         Déjà Perçu
                                         {% if sort_by == 'total_percu' %}
                                             {% if order == 'asc' %}▲{% else %}▼{% endif %}
@@ -62,7 +62,7 @@
                                     </a>
                                 </th>
                                 <th scope="col">
-                                    <a href="{{ url_for('finances_ecoles', sort_by='reste_a_payer', order='asc' if sort_by != 'reste_a_payer' or order == 'desc' else 'desc', search=search, page=1) }}">
+                                    <a href="{{ url_for('schools.finances_ecoles', sort_by='reste_a_payer', order='asc' if sort_by != 'reste_a_payer' or order == 'desc' else 'desc', search=search, page=1) }}">
                                         Reste à Payer
                                         {% if sort_by == 'reste_a_payer' %}
                                             {% if order == 'asc' %}▲{% else %}▼{% endif %}
@@ -91,17 +91,17 @@
                     <ul class="pagination justify-content-center">
                         {% if page > 1 %}
                         <li class="page-item">
-                            <a class="page-link" href="{{ url_for('finances_ecoles', page=page-1, sort_by=sort_by, order=order, search=search) }}">Précédent</a>
+                            <a class="page-link" href="{{ url_for('schools.finances_ecoles', page=page-1, sort_by=sort_by, order=order, search=search) }}">Précédent</a>
                         </li>
                         {% endif %}
                         {% for p in range(1, total_pages + 1) %}
                         <li class="page-item {% if p == page %}active{% endif %}">
-                            <a class="page-link" href="{{ url_for('finances_ecoles', page=p, sort_by=sort_by, order=order, search=search) }}">{{ p }}</a>
+                            <a class="page-link" href="{{ url_for('schools.finances_ecoles', page=p, sort_by=sort_by, order=order, search=search) }}">{{ p }}</a>
                         </li>
                         {% endfor %}
                         {% if page < total_pages %}
                         <li class="page-item">
-                            <a class="page-link" href="{{ url_for('finances_ecoles', page=page+1, sort_by=sort_by, order=order, search=search) }}">Suivant</a>
+                            <a class="page-link" href="{{ url_for('schools.finances_ecoles', page=page+1, sort_by=sort_by, order=order, search=search) }}">Suivant</a>
                         </li>
                         {% endif %}
                     </ul>
