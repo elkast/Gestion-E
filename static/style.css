@@ -277,28 +277,116 @@ body {
   border-radius: var(--rayon-bordure) var(--rayon-bordure) 0 0;
 }
 
-/* Responsive */
+/* Responsive Design - Amélioré */
+
+/* Tablettes et petits écrans */
+@media (max-width: 992px) {
+  .navbar-brand {
+    font-size: 1.2em;
+  }
+
+  .btn {
+    padding: 10px 20px;
+    font-size: 0.85em;
+  }
+}
+
+/* Smartphones */
 @media (max-width: 768px) {
   .container-fluid {
-    padding: 15px;
+    padding: 10px;
+  }
+
+  .navbar {
+    margin-bottom: 20px;
+  }
+
+  .navbar-brand {
+    font-size: 1em;
   }
 
   .stat-card {
     margin-bottom: 15px !important;
-    padding: 20px !important;
+    padding: 15px !important;
   }
 
   .montant {
-    font-size: 1.8em !important;
+    font-size: 1.5em !important;
   }
 
   .card-header h5 {
-    font-size: 1.1em;
+    font-size: 1em;
+  }
+
+  .card-header {
+    padding: 12px 15px;
+  }
+
+  .table {
+    font-size: 0.85em;
   }
 
   .table td, .table th {
     padding: 8px 10px;
-    font-size: 0.9em;
+    font-size: 0.85em;
+  }
+
+  /* Rendre le tableau scrollable horizontalement sur mobile */
+  .table-responsive {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .btn {
+    padding: 8px 16px;
+    font-size: 0.8em;
+    margin-bottom: 5px;
+  }
+
+  .btn-group {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+  }
+
+  .btn-group .btn {
+    width: 100%;
+  }
+
+  /* Formulaires sur mobile */
+  .form-control, .form-select {
+    font-size: 16px; /* Évite le zoom automatique sur iOS */
+  }
+
+  .modal-dialog {
+    margin: 10px;
+  }
+}
+
+/* Très petits écrans */
+@media (max-width: 576px) {
+  .montant {
+    font-size: 1.3em !important;
+  }
+
+  h1 {
+    font-size: 1.5em;
+  }
+
+  h2 {
+    font-size: 1.3em;
+  }
+
+  h3 {
+    font-size: 1.1em;
+  }
+
+  .card {
+    margin-bottom: 15px;
+  }
+
+  .stat-card {
+    padding: 12px !important;
   }
 }
 

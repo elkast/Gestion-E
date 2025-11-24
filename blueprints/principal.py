@@ -245,7 +245,7 @@ def edit_module(module_id):
     ecoles = cur.fetchall()
     cur.close()
 
-    return render_template('edit_module.html', module=module, ecoles=ecoles, volume_total=module.volume_total, montant_total=module.montant_total, montant_heure=module.montant_heure)
+    return render_template('edit_module.html', module=module, ecoles=ecoles, volume_total=module['volume_total'], montant_total=module['montant_total'], montant_heure=module['montant_heure'])
 
 # Function to calculate totals
 def calculate_totals(volume_cm, volume_td, volume_tp, tarif_cm, tarif_td, tarif_tp):
@@ -392,8 +392,11 @@ def add_module():
         flash('Module ajouté avec succès!', 'success')
         return redirect('/')
 
+    # Récupération des écoles pour le formulaire
+    cur.execute("SELECT id, nom FROM ecoles ORDER BY nom")
+    ecoles = cur.fetchall()
     cur.close()
-    return render_template('add_module.html')
+    return render_template('add_module.html', ecoles=ecoles)
 
 @principal_bp.route('/add-sample-data')
 def add_sample_data():
