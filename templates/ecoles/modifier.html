@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Modifier un Établissement</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <div class="container-fluid">
+        <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+            <div class="container">
+                <a class="navbar-brand" href="/">Gestion Enseignement</a>
+                <div class="navbar-nav">
+                    <a class="nav-link" href="/">Tableau de Bord</a>
+                    <a class="nav-link active" href="/ecoles">Établissements</a>
+                </div>
+            </div>
+        </nav>
+
+        <div class="card mt-4">
+            <div class="card-header">
+                <h5 style="color: white;">Modifier l'Établissement</h5>
+            </div>
+            <div class="card-body">
+                <form method="POST">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Nom de l'Établissement</label>
+                            <input type="text" name="nom" class="form-control" value="{{ ecole.nom }}" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Type d'Établissement</label>
+                            <select name="type_etablissement" class="form-select" required>
+                                <option value="Université" {% if ecole.type_etablissement == 'Université' %}selected{% endif %}>Université</option>
+                                <option value="Grande École" {% if ecole.type_etablissement == 'Grande École' %}selected{% endif %}>Grande École</option>
+                                <option value="Institut" {% if ecole.type_etablissement == 'Institut' %}selected{% endif %}>Institut</option>
+                                <option value="Lycée" {% if ecole.type_etablissement == 'Lycée' %}selected{% endif %}>Lycée</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Ville</label>
+                            <input type="text" name="ville" class="form-control" value="{{ ecole.ville }}" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Contact</label>
+                            <input type="text" name="contact" class="form-control" value="{{ ecole.contact }}" required>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Téléphone</label>
+                            <input type="text" name="telephone" class="form-control" value="{{ ecole.telephone }}">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Email</label>
+                            <input type="email" name="email" class="form-control" value="{{ ecole.email }}">
+                        </div>
+                    </div>
+
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-primary">Enregistrer</button>
+                        <a href="/ecoles" class="btn btn-secondary">Annuler</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

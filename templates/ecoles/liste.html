@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Liste des Établissements</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <div class="container-fluid">
+        <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+            <div class="container">
+                <a class="navbar-brand" href="/"> 🎓 Gestion Enseignement Mr Koffi Elise</a>
+                <div class="navbar-nav">
+                    <a class="nav-link" href="/">Tableau de Bord</a>
+                    <a class="nav-link" href="/ajouter-module">Nouveau Module</a>
+                    <a class="nav-link active" href="/ecoles">Établissements</a>
+                    <a class="nav-link" href="/ecoles/gestion-volumes-niveau">Gestion Volumes</a>
+                    <a class="nav-link" href="/ecoles/finances">États Financiers</a>
+                    <a class="nav-link" href="/export">Export</a>
+                </div>
+            </div>
+        </nav>
+
+        <div class="container mt-4">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h4 style="color: white;">🏫 Établissements Scolaires</h4>
+                    <a href="/ecoles/ajouter" class="btn btn-primary">➕ Nouvel Établissement</a>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Nom</th>
+                                    <th>Type</th>
+                                    <th>Ville</th>
+                                    <th>Contact</th>
+                                    <th>Téléphone</th>
+                                    <th>Montant Total</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for ecole in ecoles %}
+                                <tr>
+                                    <td><strong>{{ ecole.nom }}</strong></td>
+                                    <td>{{ ecole.type_etablissement or 'N/A' }}</td>
+                                    <td>{{ ecole.ville or 'N/A' }}</td>
+                                    <td>{{ ecole.contact or 'N/A' }}</td>
+                                    <td>{{ ecole.telephone or 'N/A' }}</td>
+                                    <td><strong>{{ "{:,.0f}".format(ecole.montant_total_ecole) }} FCFA</strong></td>
+                                    <td>
+                                        <a href="/ecoles/modifier/{{ ecole.id }}" class="btn btn-sm btn-outline-primary">✏️ Modifier</a>
+                                        <a href="/ecoles/supprimer/{{ ecole.id }}" class="btn btn-sm btn-outline-danger" onclick="return confirm('Êtes-vous sûr de vouloir supprimer cet établissement ?')">🗑️ Supprimer</a>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

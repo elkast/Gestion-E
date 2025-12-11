@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Modifier un Paiement</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <div class="container-fluid">
+        <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+            <div class="container">
+                <a class="navbar-brand" href="/">Gestion Enseignement</a>
+                <div class="navbar-nav">
+                    <a class="nav-link" href="/">Tableau de Bord</a>
+                </div>
+            </div>
+        </nav>
+
+        <div class="card mt-4">
+            <div class="card-header">
+                <h5 style="color: white;">Modifier le Paiement</h5>
+            </div>
+            <div class="card-body">
+                <form method="POST">
+                    <input type="hidden" name="module_id" value="{{ paiement.module_id }}">
+                    
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Montant (FCFA)</label>
+                            <input type="number" step="0.01" name="montant" class="form-control" value="{{ paiement.montant }}" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Type de Paiement</label>
+                            <select name="type_paiement" class="form-select" required>
+                                <option value="Espèces" {% if paiement.type_paiement == 'Espèces' %}selected{% endif %}>Espèces</option>
+                                <option value="Chèque" {% if paiement.type_paiement == 'Chèque' %}selected{% endif %}>Chèque</option>
+                                <option value="Virement" {% if paiement.type_paiement == 'Virement' %}selected{% endif %}>Virement</option>
+                                <option value="Mobile Money" {% if paiement.type_paiement == 'Mobile Money' %}selected{% endif %}>Mobile Money</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Référence</label>
+                            <input type="text" name="reference" class="form-control" value="{{ paiement.reference }}" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Date de Paiement</label>
+                            <input type="date" name="date_paiement" class="form-control" value="{{ paiement.date_paiement }}" required>
+                        </div>
+                    </div>
+
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-primary">Enregistrer</button>
+                        <a href="/paiements/module/{{ paiement.module_id }}" class="btn btn-secondary">Annuler</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

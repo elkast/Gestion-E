@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Paiements - {{ module.nom_module }}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <div class="container-fluid">
+        <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+            <div class="container">
+                <a class="navbar-brand" href="/"> 🎓 Gestion Enseignement Mr Koffi Elise</a>
+                <div class="navbar-nav">
+                    <a class="nav-link" href="/">Tableau de Bord</a>
+                    <a class="nav-link" href="/ajouter-module">Nouveau Module</a>
+                    <a class="nav-link" href="/ecoles">Établissements</a>
+                </div>
+            </div>
+        </nav>
+
+        <div class="container mt-4">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h4 style="color: white;">📚 Module : {{ module.nom_module }}</h4>
+                </div>
+                <div class="card-body">
+                    <p><strong>École :</strong> {{ module.nom_ecole }}</p>
+                    <p><strong>Niveau :</strong> {{ module.niveau }}</p>
+                    <p><strong>Montant Total :</strong> {{ "{:,.0f}".format(module.montant_total) }} FCFA</p>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h4 style="color: white;">💰 Paiements</h4>
+                    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#ajouterPaiementModal">
+                        ➕ Nouveau Paiement
+                    </button>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Montant</th>
+                                    <th>Type</th>
+                                    <th>Référence</th>
+                                    <th>Statut</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for paiement in paiements %}
+                                <tr>
+                                    <td>{{ paiement.date_paiement }}</td>
+                                    <td><strong>{{ "{:,.0f}".format(paiement.montant) }} FCFA</strong></td>
+                                    <td>{{ paiement.type_paiement }}</td>
+                                    <td>{{ paiement.reference }}</td>
+                                    <td>
+                                        <span class="badge {% if paiement.statut == 'complet' %}bg-success{% else %}bg-warning{% endif %}">
+                                            {{ paiement.statut }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <a href="/paiements/modifier/{{ paiement.id }}" class="btn btn-sm btn-outline-primary">✏️</a>
+                                        <a href="/paiements/supprimer/{{ paiement.id }}" class="btn btn-sm btn-outline-danger" onclick="return confirm('Supprimer ce paiement ?')">🗑️</a>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    <a href="/" class="btn btn-outline-secondary mt-3">← Retour au Tableau de Bord</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Ajouter Paiement -->
+    <div class="modal fade" id="ajouterPaiementModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Nouveau Paiement</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <form method="POST" action="/paiements/ajouter">
+                    <div class="modal-body">
+                        <input type="hidden" name="module_id" value="{{ module.id }}">
+                        <div class="mb-3">
+                            <label class="form-label">Montant (FCFA) *</label>
+                            <input type="number" class="form-control" name="montant" required min="0" step="100">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Type de Paiement *</label>
+                            <select class="form-select" name="type_paiement" required>
+                                <option value="Virement">Virement</option>
+                                <option value="Chèque">Chèque</option>
+                                <option value="Espèces">Espèces</option>
+                                <option value="Mobile Money">Mobile Money</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Référence</label>
+                            <input type="text" class="form-control" name="reference" placeholder="Ex: REF-2024-001">
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                        <button type="submit" class="btn btn-success">💾 Enregistrer</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

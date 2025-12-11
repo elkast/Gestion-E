@@ -1,82 +1,94 @@
+"""
+Blueprint paiements - Gestion des paiements des modules.
+"""
 from flask import Blueprint, render_template, request, redirect, url_for, flash, g
-from .db import get_db
+from database.connexion import obtenir_db
 
-payments_bp = Blueprint('payments', __name__)
+bp_paiements = Blueprint('paiements', __name__, url_prefix='/paiements')
 
-# Gestion des paiements
-@payments_bp.route('/module/<int:module_id>/paiements')
-def gestion_paiements(module_id):
-    db = get_db()
-    cur = db.cursor()
+
+@bp_paiements.route('/module/<int:module_id>')
+def liste_paiements(module_id):
+    """Affiche les paiements d'un module."""
+    db = obtenir_db()
+    curseur = db.cursor()
     
     # Récupération du module
-    cur.execute("""
-        SELECT m.*, e.nom as ecole_nom 
+    curseur.execute("""
+        SELECT m.*, e.nom as nom_ecole 
         FROM modules m 
         LEFT JOIN ecoles e ON m.ecole_id = e.id 
         WHERE m.id = %s
     """, (module_id,))
-    module = cur.fetchone()
+    module = curseur.fetchone()
     
     # Récupération des paiements
-    cur.execute("SELECT * FROM paiements WHERE module_id = %s ORDER BY date_paiement", (module_id,))
-    paiements = cur.fetchall()
+    curseur.execute("SELECT * FROM paiements WHERE module_id = %s ORDER BY date_paiement", (module_id,))
+    paiements = curseur.fetchall()
     
-    cur.close()
-    return render_template('paiements.html', module=module, paiements=paiements)
+    curseur.close()
+    return render_template('paiements/liste.html', module=module, paiements=paiements)
 
-# Ajouter un paiement
-@payments_bp.route('/ajouter-paiement', methods=['POST'])
+
+@bp_paiements.route('/ajouter', methods=['POST'])
 def ajouter_paiement():
+    """Ajoute un nouveau paiement."""
     module_id = request.form['module_id']
     montant = float(request.form['montant'])
     type_paiement = request.form['type_paiement']
     reference = request.form['reference']
 
-    db = get_db()
-    cur = db.cursor()
+    db = obtenir_db()
+    curseur = db.cursor()
 
     # Calculer le total des paiements pour le module
-    cur.execute("SELECT SUM(montant) as total_percu FROM paiements WHERE module_id = %s", (module_id,))
-    result = cur.fetchone()
-    total_percu = result['total_percu'] if result['total_percu'] else 0
+    curseur.execute("SELECT SUM(montant) as total_percu FROM paiements WHERE module_id = %s", (module_id,))
+    resultat = curseur.fetchone()
+    total_percu = resultat['total_percu'] if resultat['total_percu'] else 0
+    
     # Obtenir le montant total du module
-    cur.execute("SELECT montant_total FROM modules WHERE id = %s", (module_id,))
-    module = cur.fetchone()
+    curseur.execute("SELECT montant_total FROM modules WHERE id = %s", (module_id,))
+    module = curseur.fetchone()
     montant_total = module['montant_total'] if module else 0
 
     # Calculer le nouveau total après ce paiement
-    new_total_percu = float(total_percu) + montant
+    nouveau_total_percu = float(total_percu) + montant
 
     # Vérifier si le nouveau paiement dépasse le montant total
-    if new_total_percu > montant_total:
+    if nouveau_total_percu > montant_total:
         flash('Le montant total des paiements ne peut pas dépasser le montant total du module.', 'danger')
-        return redirect(f'/module/{module_id}/paiements')
+        return redirect(f'/paiements/module/{module_id}')
 
     # Déterminer le statut automatiquement
-    if new_total_percu == montant_total:
+    if nouveau_total_percu == montant_total:
         statut = 'complet'
-    elif new_total_percu < montant_total:
+    elif nouveau_total_percu < montant_total:
         statut = 'partiel'
     else:
-        statut = 'excédent'  # Surpaiement
+        statut = 'excédent'
 
-    cur.execute("""
+    placeholder = '?' if g.est_sqlite else '%s'
+    curseur.execute(f"""
         INSERT INTO paiements (module_id, montant, type_paiement, reference, date_paiement, statut)
-        VALUES (%s, %s, %s, %s, CURDATE(), %s)
+        VALUES ({placeholder}, {placeholder}, {placeholder}, {placeholder}, DATE('now'), {placeholder})
+    """ if g.est_sqlite else f"""
+        INSERT INTO paiements (module_id, montant, type_paiement, reference, date_paiement, statut)
+        VALUES ({placeholder}, {placeholder}, {placeholder}, {placeholder}, CURDATE(), {placeholder})
     """, (module_id, montant, type_paiement, reference, statut))
 
     db.commit()
-    cur.close()
+    curseur.close()
 
-    flash('Paiement enregistré avec succès!', 'success')
-    return redirect(f'/module/{module_id}/paiements')
+    flash('Paiement enregistré avec succès !', 'success')
+    return redirect(f'/paiements/module/{module_id}')
 
-# Modifier un paiement
-@payments_bp.route('/edit-paiement/<int:paiement_id>', methods=['GET', 'POST'])
-def edit_paiement(paiement_id):
-    db = get_db()
-    cur = db.cursor()
+
+@bp_paiements.route('/modifier/<int:paiement_id>', methods=['GET', 'POST'])
+def modifier_paiement(paiement_id):
+    """Modifie un paiement existant."""
+    db = obtenir_db()
+    curseur = db.cursor()
+    
     if request.method == 'POST':
         montant = float(request.form['montant'])
         type_paiement = request.form['type_paiement']
@@ -85,60 +97,68 @@ def edit_paiement(paiement_id):
         module_id = request.form['module_id']
 
         # Calculer le total des paiements en excluant le paiement actuel
-        cur.execute("SELECT SUM(montant) as total_percu FROM paiements WHERE module_id = %s AND id != %s", (module_id, paiement_id))
-        result = cur.fetchone()
-        total_percu = result['total_percu'] if result['total_percu'] else 0
+        curseur.execute("SELECT SUM(montant) as total_percu FROM paiements WHERE module_id = %s AND id != %s", 
+                       (module_id, paiement_id))
+        resultat = curseur.fetchone()
+        total_percu = resultat['total_percu'] if resultat['total_percu'] else 0
 
         # Obtenir le montant total du module
-        cur.execute("SELECT montant_total FROM modules WHERE id = %s", (module_id,))
-        module = cur.fetchone()
+        curseur.execute("SELECT montant_total FROM modules WHERE id = %s", (module_id,))
+        module = curseur.fetchone()
         montant_total = module['montant_total'] if module else 0
 
         # Calculer le nouveau total après la mise à jour de ce paiement
-        new_total_percu = float(total_percu) + montant
+        nouveau_total_percu = float(total_percu) + montant
 
         # Déterminer le statut automatiquement
-        if new_total_percu == montant_total:
+        if nouveau_total_percu == montant_total:
             statut = 'complet'
-        elif new_total_percu < montant_total:
+        elif nouveau_total_percu < montant_total:
             statut = 'partiel'
         else:
-            statut = 'excédent'  # Surpaiement
+            statut = 'excédent'
 
-        cur.execute("""
-            UPDATE paiements SET montant=%s, type_paiement=%s, reference=%s, date_paiement=%s, statut=%s
-            WHERE id=%s
+        placeholder = '?' if g.est_sqlite else '%s'
+        curseur.execute(f"""
+            UPDATE paiements 
+            SET montant={placeholder}, type_paiement={placeholder}, reference={placeholder}, 
+                date_paiement={placeholder}, statut={placeholder}
+            WHERE id={placeholder}
         """, (montant, type_paiement, reference, date_paiement, statut, paiement_id))
         db.commit()
-        cur.close()
+        curseur.close()
 
-        flash('Paiement modifié avec succès!', 'success')
-        return redirect(f'/module/{module_id}/paiements')
+        flash('Paiement modifié avec succès !', 'success')
+        return redirect(f'/paiements/module/{module_id}')
+    
+    curseur.execute("SELECT * FROM paiements WHERE id = %s", (paiement_id,))
+    paiement = curseur.fetchone()
+    curseur.close()
+    
+    if paiement:
+        return render_template('paiements/modifier.html', paiement=paiement)
     else:
-        cur.execute("SELECT * FROM paiements WHERE id = %s", (paiement_id,))
-        paiement = cur.fetchone()
-        cur.close()
-        if paiement:
-            return render_template('edit_paiement.html', paiement=paiement)
-        else:
-            flash('Paiement non trouvé.', 'danger')
-            return redirect('/')
+        flash('Paiement non trouvé.', 'danger')
+        return redirect('/')
 
-# Supprimer un paiement
-@payments_bp.route('/delete-paiement/<int:paiement_id>')
-def delete_paiement(paiement_id):
-    db = get_db()
-    cur = db.cursor()
-    cur.execute("SELECT module_id FROM paiements WHERE id = %s", (paiement_id,))
-    paiement = cur.fetchone()
+
+@bp_paiements.route('/supprimer/<int:paiement_id>')
+def supprimer_paiement(paiement_id):
+    """Supprime un paiement."""
+    db = obtenir_db()
+    curseur = db.cursor()
+    curseur.execute("SELECT module_id FROM paiements WHERE id = %s", (paiement_id,))
+    paiement = curseur.fetchone()
+    
     if paiement:
         module_id = paiement['module_id']
-        cur.execute("DELETE FROM paiements WHERE id = %s", (paiement_id,))
+        placeholder = '?' if g.est_sqlite else '%s'
+        curseur.execute(f"DELETE FROM paiements WHERE id = {placeholder}", (paiement_id,))
         db.commit()
-        cur.close()
-        flash('Paiement supprimé avec succès!', 'success')
-        return redirect(f'/module/{module_id}/paiements')
+        curseur.close()
+        flash('Paiement supprimé avec succès !', 'success')
+        return redirect(f'/paiements/module/{module_id}')
     else:
-        cur.close()
+        curseur.close()
         flash('Paiement non trouvé.', 'danger')
         return redirect('/')

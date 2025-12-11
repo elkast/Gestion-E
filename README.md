@@ -1,71 +1,141 @@
 # 🎓 Gestion d'Enseignement - Application Web
 
-Application web Flask pour la gestion des établissements scolaires, modules et paiements.
+[![Flask](https://img.shields.io/badge/Flask-3.1.2-blue.svg)](https://flask.palletsprojects.com/)
+[![Python](https://img.shields.io/badge/Python-3.8+-green.svg)](https://www.python.org/)
+[![License](https://img.shields.io/badge/License-Private-red.svg)]()
 
-## 🌟 Fonctionnalités
+Application web moderne développée avec Flask pour la gestion complète des établissements scolaires, modules d'enseignement et suivi des paiements. Optimisée pour le déploiement en production sur PythonAnywhere.
 
-- ✅ Gestion des établissements scolaires
-- ✅ Gestion des modules par niveau
-- ✅ Suivi des paiements
-- ✅ Génération de rapports financiers
-- ✅ Export Excel et PDF
-- ✅ Interface utilisateur moderne et responsive
+## 🌟 Fonctionnalités Principales
+
+### 📚 Gestion des Établissements Scolaires
+- ✅ Ajout, modification et suppression d'établissements
+- ✅ Gestion des informations détaillées (nom, type, ville, contact)
+- ✅ Suivi des volumes horaires par niveau (CM, TD, TP)
+
+### 🎓 Gestion des Modules
+- ✅ Création de modules avec calculs automatiques des volumes et montants
+- ✅ Gestion par niveaux académiques (Licence 1-3, Master 1-2, Doctorat)
+- ✅ Calcul automatique des tarifs horaires et totaux
+- ✅ Modification et suppression de modules
+
+### 💰 Suivi des Paiements
+- ✅ Enregistrement des paiements par module
+- ✅ Calcul automatique du statut (partiel, complet, excédent)
+- ✅ Gestion des types de paiement et références
+- ✅ Historique complet des transactions
+
+### 📊 Rapports et Exports
+- ✅ Tableaux de bord avec statistiques financières
+- ✅ Rapports financiers par établissement
+- ✅ Export Excel avec données complètes
+- ✅ Export PDF pour les rapports
+
+### 🎨 Interface Utilisateur
+- ✅ Design moderne et responsive
+- ✅ Interface intuitive avec navigation fluide
+- ✅ Messages de feedback utilisateur
+- ✅ Gestion des erreurs et validations
 
 ## 🚀 Déploiement
 
 Cette application est optimisée pour le déploiement sur **PythonAnywhere**.
 
-📖 **Consultez le guide complet** : [DEPLOIEMENT_PYTHONANYWHERE.md](DEPLOIEMENT_PYTHONANYWHERE.md)
+## 💻 Installation et Configuration
 
-## 💻 Installation locale (développement)
+### Prérequis Système
 
-### Prérequis
+- **Python** : Version 3.8 ou supérieure
+- **Base de données** :
+  - MySQL 5.7+ (recommandé pour production)
+  - SQLite 3+ (pour développement/tests locaux)
+- **Mémoire** : Minimum 512MB RAM
+- **Espace disque** : 100MB libre
 
-- Python 3.8+
-- MySQL (ou SQLite pour les tests)
+### 🚀 Installation Rapide
 
-### Installation
-
-1. Clonez le repository :
 ```bash
+# 1. Cloner le repository
 git clone https://github.com/VOTRE_USERNAME/projet_mr_koffi.git
 cd projet_mr_koffi
-```
 
-2. Créez un environnement virtuel :
-```bash
+# 2. Créer l'environnement virtuel
 python -m venv venv
-source venv/bin/activate  # Sur Windows: venv\Scripts\activate
-```
 
-3. Installez les dépendances :
-```bash
+# 3. Activer l'environnement virtuel
+# Sur Linux/Mac :
+source venv/bin/activate
+# Sur Windows :
+venv\Scripts\activate
+
+# 4. Installer les dépendances
 pip install -r requirements.txt
-```
 
-4. Configurez les variables d'environnement :
-```bash
-cp .env.example .env
-# Éditez .env avec vos paramètres
-```
+# 5. Configurer les variables d'environnement
+cp .env .env.local  # Copier le fichier .env existant
+# Éditer .env.local avec vos paramètres locaux
 
-5. Initialisez la base de données :
-```bash
-# Pour MySQL
-mysql -u root -p < schema_final_utf8.sql
-
-# Pour SQLite (tests locaux)
-sqlite3 gestion_enseignement.db < schema_final_utf8.sql
-```
-
-6. Lancez l'application :
-```bash
+# 6. Lancer l'application
 python app.py
 ```
 
-7. Accédez à l'application :
+### 🔧 Configuration Détaillée
+
+#### Variables d'Environnement (.env)
+
+```bash
+# Configuration de la base de données
+USE_SQLITE=True                    # True pour SQLite, False pour MySQL
+SQLITE_DB=gestion_enseignement.db  # Chemin vers la DB SQLite
+
+# Configuration MySQL (si USE_SQLITE=False)
+MYSQL_HOST=localhost
+MYSQL_USER=votre_utilisateur
+MYSQL_PASSWORD=votre_mot_de_passe
+MYSQL_DB=gestion_enseignement
+MYSQL_PORT=3306
+
+# Configuration Flask
+SECRET_KEY=votre_cle_secrete_unique
+FLASK_DEBUG=True                   # True pour développement
+FLASK_ENV=development
+
+# Sécurité
+SESSION_COOKIE_SECURE=False        # True en production HTTPS
 ```
-http://localhost:5000
+
+#### Base de Données
+
+**Pour MySQL (Production) :**
+```sql
+CREATE DATABASE gestion_enseignement CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+-- Créer les tables selon le schéma de l'application
+```
+
+**Pour SQLite (Développement) :**
+- La base de données est créée automatiquement au premier lancement
+- Fichier : `gestion_enseignement.db`
+
+### 🌐 Accès à l'Application
+
+Une fois lancée, l'application est accessible sur :
+- **Développement** : http://localhost:5000
+- **Production** : Selon votre configuration de déploiement
+
+### 🏥 Vérification du Fonctionnement
+
+Testez l'endpoint de santé :
+```bash
+curl http://localhost:5000/health
+```
+
+Réponse attendue :
+```json
+{
+  "status": "healthy",
+  "database": "connected",
+  "message": "Application is running correctly"
+}
 ```
 
 ## 📁 Structure du projet
@@ -93,38 +163,109 @@ projet_mr_koffi/
 └── schema_final_utf8.sql           # Schéma de la base de données
 ```
 
-## 🗄️ Base de données
+## 🗄️ Base de Données
 
-L'application supporte deux types de bases de données :
+### Schéma des Tables
 
-- **MySQL** : Pour la production (PythonAnywhere, Railway, etc.)
-- **SQLite** : Pour les tests locaux
+L'application utilise les tables suivantes :
 
-Configuration via variables d'environnement dans `.env`.
+- **`ecoles`** : Établissements scolaires (id, nom, type, ville, contact, téléphone)
+- **`modules`** : Modules d'enseignement (id, nom, école, niveau, volumes horaires, tarifs)
+- **`paiements`** : Transactions financières (id, module, montant, type, référence, date)
+- **`ecole_niveau_volumes`** : Volumes par niveau et établissement
 
-## 🔐 Sécurité
+### Support Multi-Base de Données
 
-- ✅ Clé secrète Flask configurée
-- ✅ Mots de passe stockés de manière sécurisée
-- ✅ Protection CSRF
-- ✅ Variables d'environnement pour les informations sensibles
+| Aspect | MySQL (Production) | SQLite (Développement) |
+|--------|-------------------|------------------------|
+| **Performance** | ⭐⭐⭐⭐⭐ | ⭐⭐⭐ |
+| **Concurrency** | ⭐⭐⭐⭐⭐ | ⭐⭐ |
+| **Taille max** | Illimitée | 1GB |
+| **Migration** | Manuel | Automatique |
+| **Backup** | Outils dédiés | Copie fichier |
 
-## 📊 Endpoints
+### Configuration
 
-- `/` - Page d'accueil
-- `/ecoles` - Gestion des établissements
-- `/module/<id>/paiements` - Gestion des paiements
-- `/health` - Vérification de l'état de l'application
+```python
+# config.py - Configuration automatique
+USE_SQLITE = os.environ.get('USE_SQLITE', 'True').lower() == 'true'
+if USE_SQLITE:
+    # Configuration SQLite
+else:
+    # Configuration MySQL avec PyMySQL
+```
 
-## 🛠️ Technologies utilisées
+## 🔐 Sécurité et Conformité
 
-- **Backend** : Flask 3.1.2
-- **Base de données** : MySQL / SQLite
-- **Frontend** : HTML, CSS, JavaScript
-- **Export** : ReportLab (PDF), XlsxWriter (Excel)
-- **Déploiement** : PythonAnywhere
+### Mesures de Sécurité Implémentées
 
-## 📝 Licence
+- **🔑 Authentification** : Sessions Flask sécurisées
+- **🛡️ CSRF Protection** : Protection contre les attaques cross-site
+- **🔒 Secrets Management** : Clés secrètes via variables d'environnement
+- **✅ Input Validation** : Validation côté serveur pour tous les formulaires
+- **🚫 SQL Injection** : Requêtes paramétrées avec placeholders
+- **🍪 Session Security** : Cookies HttpOnly et SameSite configurés
+
+### Conformité RGPD
+
+- ✅ Données personnelles minimisées
+- ✅ Pas de stockage de mots de passe (utilisation future possible)
+- ✅ Logs d'accès pour audit
+- ✅ Possibilité de suppression des données
+
+## 🌐 API Endpoints
+
+### Routes Principales
+
+| Endpoint | Méthode | Description | Authentification |
+|----------|---------|-------------|------------------|
+| `GET /` | GET | Tableau de bord principal | - |
+| `GET /health` | GET | Vérification santé application | - |
+| `GET /ecoles` | GET | Liste des établissements | - |
+| `POST /ajouter-ecole` | POST | Ajouter un établissement | - |
+| `GET /module/<id>` | GET | Détails d'un module | - |
+| `POST /ajouter-module` | POST | Créer un nouveau module | - |
+| `GET /module/<id>/paiements` | GET | Historique paiements module | - |
+| `POST /ajouter-paiement` | POST | Enregistrer un paiement | - |
+| `GET /export/excel` | GET | Export données Excel | - |
+| `GET /export/pdf` | GET | Export rapport PDF | - |
+
+### Codes de Réponse
+
+- **200** : Succès
+- **404** : Ressource non trouvée
+- **500** : Erreur serveur
+- **503** : Service indisponible (DB)
+
+## 🛠️ Stack Technologique
+
+### Backend
+- **Framework** : Flask 3.1.2
+- **Werkzeug** : 3.1.3 (WSGI utility)
+- **Jinja2** : 3.1.6 (Templating)
+- **python-dotenv** : 1.0.1 (Configuration)
+
+### Base de Données
+- **MySQL** : PyMySQL 1.1.1
+- **SQLite** : Inclus dans Python
+
+### Data Processing & Export
+- **pandas** : 2.3.3 (Manipulation données)
+- **numpy** : 2.3.3 (Calculs numériques)
+- **XlsxWriter** : 3.2.9 (Export Excel)
+- **ReportLab** : 4.4.4 (Génération PDF)
+
+### Déploiement
+- **PythonAnywhere** : Hébergement recommandé
+- **WSGI** : Interface serveur web
+- **Gunicorn** : Serveur WSGI alternatif
+
+### Développement
+- **IDE** : VS Code recommandé
+- **Version Control** : Git
+- **Virtual Environment** : venv
+
+## � Licence
 
 Ce projet est sous licence privée.
 

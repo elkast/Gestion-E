@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Export des Données</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <div class="container-fluid">
+        <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+            <div class="container">
+                <a class="navbar-brand" href="/"> 🎓 Gestion Enseignement Mr Koffi Elise</a>
+                <div class="navbar-nav">
+                    <a class="nav-link" href="/">Tableau de Bord</a>
+                    <a class="nav-link" href="/ajouter-module">Nouveau Module</a>
+                    <a class="nav-link" href="/ecoles">Établissements</a>
+                    <a class="nav-link" href="/ecoles/gestion-volumes-niveau">Gestion Volumes</a>
+                    <a class="nav-link" href="/ecoles/finances">États Financiers</a>
+                    <a class="nav-link active" href="/export">Export</a>
+                </div>
+            </div>
+        </nav>
+
+        <div class="container mt-5">
+            <div class="card">
+                <div class="card-header">
+                    <h3>📊 Export des Données</h3>
+                </div>
+                <div class="card-body">
+                    <p>Exportez vos données dans différents formats :</p>
+                    
+                    <div class="row mt-4">
+                        <div class="col-md-6">
+                            <div class="card">
+                                <div class="card-body text-center">
+                                    <h5>📗 Export Excel</h5>
+                                    <p>Exportez toutes les données en format Excel (.xlsx)</p>
+                                    <a href="/export/excel" class="btn btn-success">
+                                        📥 Télécharger Excel
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <div class="card">
+                                <div class="card-body text-center">
+                                    <h5>📕 Export PDF</h5>
+                                    <p>Exportez un rapport en format PDF</p>
+                                    <a href="/export/pdf" class="btn btn-danger">
+                                        📥 Télécharger PDF
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

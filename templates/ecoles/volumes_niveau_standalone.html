@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestion des Volumes par Niveau</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <div class="container-fluid">
+        <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+            <div class="container">
+                <a class="navbar-brand" href="/">Gestion Enseignement</a>
+                <div class="navbar-nav">
+                    <a class="nav-link" href="/">Tableau de Bord</a>
+                    <a class="nav-link" href="/ecoles">Établissements</a>
+                    <a class="nav-link active" href="/ecoles/gestion-volumes-niveau">Gestion Volumes</a>
+                </div>
+            </div>
+        </nav>
+
+        <div class="card mt-4">
+            <div class="card-header">
+                <h5 style="color: white;">Gestion des Volumes par Niveau</h5>
+            </div>
+            <div class="card-body">
+                <p>Sélectionnez un établissement pour gérer les volumes horaires par niveau :</p>
+                
+                <div class="list-group">
+                    {% for ecole in ecoles %}
+                    <a href="/ecoles/{{ ecole.id }}/volumes-niveau" class="list-group-item list-group-item-action">
+                        <h5 class="mb-1">{{ ecole.nom }}</h5>
+                    </a>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestion Enseignement - Tableau de Bord</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <div class="container-fluid">
+        <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+            <div class="container">
+                <a class="navbar-brand" href="/"> 🎓 Gestion Enseignement Mr Koffi Elise</a>
+                <div class="navbar-nav">
+                    <a class="nav-link active" href="/">Tableau de Bord</a>
+                    <a class="nav-link" href="/ajouter-module">Nouveau Module</a>
+                    <a class="nav-link" href="/ecoles">Établissements</a>
+                    <a class="nav-link" href="/ecoles/gestion-volumes-niveau">Gestion Volumes</a>
+                    <a class="nav-link" href="/ecoles/finances">États Financiers</a>
+                    <a class="nav-link" href="/export">Export</a>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Résumé financier -->
+        <div class="row mt-4">
+            <div class="col-md-4">
+                <div class="stat-card text-center">
+                    <h5>Gains Total</h5>
+                    <div class="montant">{{ "{:,.0f}".format(total_ca) }} FCFA</div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="stat-card text-center">
+                    <h5>Déjà Perçu</h5>
+                    <div class="montant">{{ "{:,.0f}".format(total_percu) }} FCFA</div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="stat-card text-center">
+                    <h5>Reste à Percevoir</h5>
+                    <div class="montant {% if total_reste > 0 %}solde-negatif{% else %}solde-positif{% endif %}">
+                        {{ "{:,.0f}".format(total_reste) }} FCFA
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tableau des modules -->
+        <div class="card mt-4">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 style="color: white;">Mes Modules d'Enseignement</h5>
+                <a href="/ajouter-module" class="btn btn-primary">➕ Nouveau Module</a>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Module</th>
+                                <th>Établissement</th>
+                                <th>Niveau</th>
+                                <th>Volume Horaire</th>
+                                <th>Montant Total</th>
+                                <th>Déjà Perçu</th>
+                                <th>Reste</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for module in modules %}
+                            <tr>
+                                <td>{{ module.nom_module }}</td>
+                                <td>{{ module.nom_ecole or 'N/A' }}</td>
+                                <td>{{ module.niveau }}</td>
+                                <td>{{ module.volume_total }}h</td>
+                                <td>{{ "{:,.0f}".format(module.montant_total) }} FCFA</td>
+                                <td>{{ "{:,.0f}".format(module.montant_percu) }} FCFA</td>
+                                <td>
+                                    <span class="{% if module.reste_a_payer > 0 %}solde-negatif{% else %}solde-positif{% endif %}">
+                                        {{ "{:,.0f}".format(module.reste_a_payer) }} FCFA
+                                    </span>
+                                </td>
+                                <td>
+                                    <a href="/paiements/module/{{ module.id }}" class="btn btn-sm btn-outline-primary">
+                                        💰 Paiements
+                                    </a>
+                                    <a href="/modifier-module/{{ module.id }}" class="btn btn-sm btn-outline-secondary">
+                                        ✏️ Modifier
+                                    </a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

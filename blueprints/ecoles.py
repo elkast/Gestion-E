@@ -1,12 +1,16 @@
+"""
+Blueprint écoles - Gestion des établissements scolaires.
+"""
 from flask import Blueprint, render_template, request, redirect, url_for, flash, g
-from .db import get_db
+from database.connexion import obtenir_db
 
-schools_bp = Blueprint('schools', __name__)
+bp_ecoles = Blueprint('ecoles', __name__, url_prefix='/ecoles')
 
-# Gestion des établissements
-@schools_bp.route('/ecoles')
-def gestion_ecoles():
-    db = get_db()
+
+@bp_ecoles.route('/')
+def liste_ecoles():
+    """Affiche la liste de tous les établissements."""
+    db = obtenir_db()
     curseur = db.cursor()
 
     # Récupération des établissements avec montants totaux
@@ -32,14 +36,15 @@ def gestion_ecoles():
         ecole['montants_par_niveau'] = curseur.fetchall()
 
     curseur.close()
-    return render_template('ecoles.html', ecoles=ecoles)
+    return render_template('ecoles/liste.html', ecoles=ecoles)
 
-# États Financiers par École
-@schools_bp.route('/finances-ecoles')
+
+@bp_ecoles.route('/finances')
 def finances_ecoles():
-    trier_par = request.args.get('sort_by', 'nom_ecole')
-    ordre = request.args.get('order', 'asc')
-    recherche = request.args.get('search', '').strip()
+    """États financiers par école."""
+    trier_par = request.args.get('trier_par', 'nom_ecole')
+    ordre = request.args.get('ordre', 'asc')
+    recherche = request.args.get('recherche', '').strip()
     page = int(request.args.get('page', 1))
     par_page = 5
 
@@ -51,11 +56,11 @@ def finances_ecoles():
     # Déterminer la direction de l'ordre
     ordre_sql = 'ASC' if ordre == 'asc' else 'DESC'
 
-    db = get_db()
+    db = obtenir_db()
     curseur = db.cursor()
 
-    # Base query with filtering
-    base_query = """
+    # Requête de base avec filtrage
+    requete_base = """
         FROM ecoles e
         LEFT JOIN modules m ON e.id = m.ecole_id
         LEFT JOIN paiements p ON m.id = p.module_id
@@ -69,7 +74,7 @@ def finances_ecoles():
         parametres.append(f"%{recherche}%")
 
     # Compter les enregistrements totaux pour la pagination
-    requete_compte = f"SELECT COUNT(DISTINCT e.id) {base_query} {clause_where}"
+    requete_compte = f"SELECT COUNT(DISTINCT e.id) {requete_base} {clause_where}"
     curseur.execute(requete_compte, parametres)
     enregistrements_totaux = curseur.fetchone()['COUNT(DISTINCT e.id)']
     pages_totales = (enregistrements_totaux + par_page - 1) // par_page
@@ -80,7 +85,7 @@ def finances_ecoles():
                COALESCE(SUM(m.montant_total), 0) as total_du,
                COALESCE(SUM(p.montant), 0) as total_percu,
                (COALESCE(SUM(m.montant_total), 0) - COALESCE(SUM(p.montant), 0)) as reste_a_payer
-        {base_query}
+        {requete_base}
         {clause_where}
         GROUP BY e.id, e.nom
         ORDER BY {trier_par} {ordre_sql}
@@ -88,99 +93,102 @@ def finances_ecoles():
     """
     parametres.extend([par_page, (page - 1) * par_page])
     curseur.execute(requete_principale, parametres)
-    finances_ecoles = curseur.fetchall()
+    finances = curseur.fetchall()
 
     curseur.close()
-    return render_template('finances_ecoles.html',
-                           finances_ecoles=finances_ecoles,
-                           sort_by=trier_par,
-                           order=ordre,
-                           search=recherche,
+    return render_template('ecoles/finances.html',
+                           finances_ecoles=finances,
+                           trier_par=trier_par,
+                           ordre=ordre,
+                           recherche=recherche,
                            page=page,
-                           total_pages=pages_totales)
+                           pages_totales=pages_totales)
 
-# Ajouter un établissement
-@schools_bp.route('/ajouter-ecole', methods=['GET', 'POST'])
+
+@bp_ecoles.route('/ajouter', methods=['GET', 'POST'])
 def ajouter_ecole():
-    db = get_db()
+    """Ajoute un nouvel établissement."""
+    db = obtenir_db()
     curseur = db.cursor()
+    
     if request.method == 'POST':
         nom = request.form['nom']
         type_etablissement = request.form['type_etablissement']
         ville = request.form['ville']
         contact = request.form['contact']
         telephone = request.form.get('telephone', '')
-        volume_cm = float(request.form.get('volume_cm', 0))
-        volume_td = float(request.form.get('volume_td', 0))
-        volume_tp = float(request.form.get('volume_tp', 0))
+        email = request.form.get('email', '')
 
-        curseur.execute("""
-            INSERT INTO ecoles (nom, type_etablissement, ville, contact, telephone, volume_cm, volume_td, volume_tp)
-            VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
-        """, (nom, type_etablissement, ville, contact, telephone, volume_cm, volume_td, volume_tp))
+        placeholder = '?' if g.est_sqlite else '%s'
+        curseur.execute(f"""
+            INSERT INTO ecoles (nom, type_etablissement, ville, contact, telephone, email)
+            VALUES ({placeholder}, {placeholder}, {placeholder}, {placeholder}, {placeholder}, {placeholder})
+        """, (nom, type_etablissement, ville, contact, telephone, email))
         db.commit()
         curseur.close()
 
-        flash('Établissement ajouté avec succès!', 'success')
+        flash('Établissement ajouté avec succès !', 'success')
         return redirect('/ecoles')
-    else:
-        # Requête GET : afficher le formulaire pour modifier ou ajouter
-        return redirect('/ecoles')
+    
+    return render_template('ecoles/ajouter.html')
 
-# Modifier un établissement
-@schools_bp.route('/edit-ecole/<int:ecole_id>', methods=['GET', 'POST'])
-def edit_ecole(ecole_id):
-    db = get_db()
+
+@bp_ecoles.route('/modifier/<int:ecole_id>', methods=['GET', 'POST'])
+def modifier_ecole(ecole_id):
+    """Modifie un établissement existant."""
+    db = obtenir_db()
     curseur = db.cursor()
+    
     if request.method == 'POST':
         nom = request.form['nom']
         type_etablissement = request.form['type_etablissement']
         ville = request.form['ville']
         contact = request.form['contact']
         telephone = request.form.get('telephone', '')
-        volume_cm = float(request.form.get('volume_cm', 0))
-        volume_td = float(request.form.get('volume_td', 0))
-        volume_tp = float(request.form.get('volume_tp', 0))
+        email = request.form.get('email', '')
 
-        curseur.execute("""
-            UPDATE ecoles SET nom=%s, type_etablissement=%s, ville=%s, contact=%s, telephone=%s, volume_cm=%s, volume_td=%s, volume_tp=%s
-            WHERE id=%s
-        """, (nom, type_etablissement, ville, contact, telephone, volume_cm, volume_td, volume_tp, ecole_id))
+        placeholder = '?' if g.est_sqlite else '%s'
+        curseur.execute(f"""
+            UPDATE ecoles 
+            SET nom={placeholder}, type_etablissement={placeholder}, ville={placeholder}, 
+                contact={placeholder}, telephone={placeholder}, email={placeholder}
+            WHERE id={placeholder}
+        """, (nom, type_etablissement, ville, contact, telephone, email, ecole_id))
         db.commit()
-
-        # Mettre à jour tous les modules de cette école avec les nouveaux volumes
-        curseur.execute("UPDATE modules SET volume_cm = %s, volume_td = %s, volume_tp = %s, volume_total = %s, montant_total = (volume_cm * tarif_cm) + (volume_td * tarif_td) + (volume_tp * tarif_tp) WHERE ecole_id = %s", (volume_cm, volume_td, volume_tp, volume_cm + volume_td + volume_tp, ecole_id))
-        db.commit()
-
         curseur.close()
 
-        flash('Établissement modifié avec succès!', 'success')
+        flash('Établissement modifié avec succès !', 'success')
         return redirect('/ecoles')
+    
+    placeholder = '?' if g.est_sqlite else '%s'
+    curseur.execute(f"SELECT * FROM ecoles WHERE id = {placeholder}", (ecole_id,))
+    ecole = curseur.fetchone()
+    curseur.close()
+    
+    if ecole:
+        return render_template('ecoles/modifier.html', ecole=ecole)
     else:
-        curseur.execute("SELECT * FROM ecoles WHERE id = %s", (ecole_id,))
-        ecole = curseur.fetchone()
-        curseur.close()
-        if ecole:
-            return render_template('edit_ecole.html', ecole=ecole)
-        else:
-            flash('Établissement non trouvé.', 'danger')
-            return redirect('/ecoles')
+        flash('Établissement non trouvé.', 'danger')
+        return redirect('/ecoles')
 
-# Supprimer un établissement
-@schools_bp.route('/delete-ecole/<int:ecole_id>')
-def delete_ecole(ecole_id):
-    db = get_db()
+
+@bp_ecoles.route('/supprimer/<int:ecole_id>')
+def supprimer_ecole(ecole_id):
+    """Supprime un établissement."""
+    db = obtenir_db()
     curseur = db.cursor()
-    curseur.execute("DELETE FROM ecoles WHERE id = %s", (ecole_id,))
+    placeholder = '?' if g.est_sqlite else '%s'
+    curseur.execute(f"DELETE FROM ecoles WHERE id = {placeholder}", (ecole_id,))
     db.commit()
     curseur.close()
-    flash('Établissement supprimé avec succès!', 'success')
+    flash('Établissement supprimé avec succès !', 'success')
     return redirect('/ecoles')
 
-# Gestion des volumes par niveau pour une école
-@schools_bp.route('/ecole/<int:ecole_id>/volumes-niveau', methods=['GET', 'POST'])
+
+@bp_ecoles.route('/<int:ecole_id>/volumes-niveau', methods=['GET', 'POST'])
 def gestion_volumes_niveau(ecole_id):
-    db = get_db()
+    """Gestion des volumes par niveau pour une école."""
+    db = obtenir_db()
     curseur = db.cursor()
 
     if request.method == 'POST':
@@ -197,13 +205,15 @@ def gestion_volumes_niveau(ecole_id):
 
             # Mettre à jour le module
             curseur.execute("""
-                UPDATE modules SET volume_cm = %s, volume_td = %s, volume_tp = %s, volume_total = %s, montant_total = (volume_cm * tarif_cm) + (volume_td * tarif_td) + (volume_tp * tarif_tp)
+                UPDATE modules 
+                SET volume_cm = %s, volume_td = %s, volume_tp = %s, volume_total = %s, 
+                    montant_total = (volume_cm * tarif_cm) + (volume_td * tarif_td) + (volume_tp * tarif_tp)
                 WHERE id = %s
             """, (volume_cm, volume_td, volume_tp, volume_total, module_id))
 
         db.commit()
-        flash('Volumes des modules mis à jour avec succès!', 'success')
-        return redirect(f'/ecole/{ecole_id}/volumes-niveau')
+        flash('Volumes des modules mis à jour avec succès !', 'success')
+        return redirect(f'/ecoles/{ecole_id}/volumes-niveau')
 
     # Récupération de l'école
     curseur.execute("SELECT * FROM ecoles WHERE id = %s", (ecole_id,))
@@ -222,14 +232,18 @@ def gestion_volumes_niveau(ecole_id):
     for niveau in niveaux:
         modules_par_niveau[niveau] = [m for m in modules if m['niveau'] == niveau]
 
-    return render_template('gestion_volumes_niveau.html', ecole=ecole, niveaux=niveaux, modules_par_niveau=modules_par_niveau)
+    return render_template('ecoles/volumes_niveau.html', 
+                         ecole=ecole, 
+                         niveaux=niveaux, 
+                         modules_par_niveau=modules_par_niveau)
 
-# Gestion des volumes par niveau - Interface standalone
-@schools_bp.route('/gestion-volumes-niveau')
+
+@bp_ecoles.route('/gestion-volumes-niveau')
 def gestion_volumes_niveau_standalone():
-    db = get_db()
+    """Interface standalone pour la gestion des volumes par niveau."""
+    db = obtenir_db()
     curseur = db.cursor()
     curseur.execute("SELECT id, nom FROM ecoles ORDER BY nom")
     ecoles = curseur.fetchall()
     curseur.close()
-    return render_template('gestion_volumes_niveau_standalone.html', ecoles=ecoles)
+    return render_template('ecoles/volumes_niveau_standalone.html', ecoles=ecoles)

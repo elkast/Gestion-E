@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>États Financiers par École</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <div class="container-fluid">
+        <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+            <div class="container">
+                <a class="navbar-brand" href="/">Gestion Enseignement</a>
+                <div class="navbar-nav">
+                    <a class="nav-link" href="/">Tableau de Bord</a>
+                    <a class="nav-link" href="/ecoles">Établissements</a>
+                    <a class="nav-link active" href="/ecoles/finances">États Financiers</a>
+                </div>
+            </div>
+        </nav>
+
+        <div class="card mt-4">
+            <div class="card-header">
+                <h5 style="color: white;">États Financiers par École</h5>
+            </div>
+            <div class="card-body">
+                <form method="GET" class="mb-3">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <input type="text" name="recherche" class="form-control" placeholder="Rechercher une école..." value="{{ recherche }}">
+                        </div>
+                        <div class="col-md-3">
+                            <select name="trier_par" class="form-select">
+                                <option value="nom_ecole" {% if trier_par == 'nom_ecole' %}selected{% endif %}>Nom</option>
+                                <option value="total_du" {% if trier_par == 'total_du' %}selected{% endif %}>Total Dû</option>
+                                <option value="total_percu" {% if trier_par == 'total_percu' %}selected{% endif %}>Total Perçu</option>
+                                <option value="reste_a_payer" {% if trier_par == 'reste_a_payer' %}selected{% endif %}>Reste</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <button type="submit" class="btn btn-primary w-100">Filtrer</button>
+                        </div>
+                    </div>
+                </form>
+
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>École</th>
+                                <th>Total Dû</th>
+                                <th>Total Perçu</th>
+                                <th>Reste à Payer</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for finance in finances_ecoles %}
+                            <tr>
+                                <td>{{ finance.nom_ecole }}</td>
+                                <td>{{ "{:,.0f}".format(finance.total_du) }} FCFA</td>
+                                <td>{{ "{:,.0f}".format(finance.total_percu) }} FCFA</td>
+                                <td>
+                                    <span class="{% if finance.reste_a_payer > 0 %}solde-negatif{% else %}solde-positif{% endif %}">
+                                        {{ "{:,.0f}".format(finance.reste_a_payer) }} FCFA
+                                    </span>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+                <nav>
+                    <ul class="pagination justify-content-center">
+                        {% for p in range(1, pages_totales + 1) %}
+                        <li class="page-item {% if p == page %}active{% endif %}">
+                            <a class="page-link" href="?page={{ p }}&trier_par={{ trier_par }}&ordre={{ ordre }}&recherche={{ recherche }}">{{ p }}</a>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                </nav>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
