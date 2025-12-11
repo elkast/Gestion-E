@@ -25,9 +25,23 @@
                     <h4 style="color: white;">📚 Module : {{ module.nom_module }}</h4>
                 </div>
                 <div class="card-body">
-                    <p><strong>École :</strong> {{ module.nom_ecole }}</p>
-                    <p><strong>Niveau :</strong> {{ module.niveau }}</p>
-                    <p><strong>Montant Total :</strong> {{ "{:,.0f}".format(module.montant_total) }} FCFA</p>
+                    <div class="row">
+                        <div class="col-md-3">
+                            <p><strong>École :</strong> {{ module.nom_ecole }}</p>
+                        </div>
+                        <div class="col-md-3">
+                            <p><strong>Niveau :</strong> {{ module.niveau }}</p>
+                        </div>
+                        <div class="col-md-2">
+                            <p><strong>Montant Total :</strong><br>{{ "{:,.0f}".format(module.montant_total) }} FCFA</p>
+                        </div>
+                        <div class="col-md-2">
+                            <p><strong>Déjà Perçu :</strong><br><span class="text-success">{{ "{:,.0f}".format(total_percu) }} FCFA</span></p>
+                        </div>
+                        <div class="col-md-2">
+                            <p><strong>Reste à Payer :</strong><br><span class="{% if reste_a_payer > 0 %}solde-negatif{% else %}solde-positif{% endif %}">{{ "{:,.0f}".format(reste_a_payer) }} FCFA</span></p>
+                        </div>
+                    </div>
                 </div>
             </div>
 
@@ -48,19 +62,27 @@
                                     <th>Type</th>
                                     <th>Référence</th>
                                     <th>Statut</th>
+                                    <th>Reste</th>
                                     <th>Actions</th>
                                 </tr>
                             </thead>
                             <tbody>
+                                {% set ns = namespace(cumul=0) %}
                                 {% for paiement in paiements %}
+                                {% set ns.cumul = ns.cumul + paiement.montant %}
                                 <tr>
                                     <td>{{ paiement.date_paiement }}</td>
                                     <td><strong>{{ "{:,.0f}".format(paiement.montant) }} FCFA</strong></td>
                                     <td>{{ paiement.type_paiement }}</td>
-                                    <td>{{ paiement.reference }}</td>
+                                    <td><code>{{ paiement.reference }}</code></td>
                                     <td>
                                         <span class="badge {% if paiement.statut == 'complet' %}bg-success{% else %}bg-warning{% endif %}">
                                             {{ paiement.statut }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <span class="{% if (module.montant_total - ns.cumul) > 0 %}solde-negatif{% else %}solde-positif{% endif %}">
+                                            {{ "{:,.0f}".format(module.montant_total - ns.cumul) }} FCFA
                                         </span>
                                     </td>
                                     <td>
@@ -91,7 +113,8 @@
                         <input type="hidden" name="module_id" value="{{ module.id }}">
                         <div class="mb-3">
                             <label class="form-label">Montant (FCFA) *</label>
-                            <input type="number" class="form-control" name="montant" required min="0" step="100">
+                            <input type="number" class="form-control" name="montant" required min="0" step="100" max="{{ reste_a_payer }}">
+                            <small class="text-muted">Reste à payer : {{ "{:,.0f}".format(reste_a_payer) }} FCFA</small>
                         </div>
                         <div class="mb-3">
                             <label class="form-label">Type de Paiement *</label>
@@ -103,8 +126,9 @@
                             </select>
                         </div>
                         <div class="mb-3">
-                            <label class="form-label">Référence</label>
-                            <input type="text" class="form-control" name="reference" placeholder="Ex: REF-2024-001">
+                            <label class="form-label">Référence (optionnel)</label>
+                            <input type="text" class="form-control" name="reference" placeholder="Laissez vide pour génération automatique">
+                            <small class="text-muted">Si vide, une référence sera générée automatiquement</small>
                         </div>
                     </div>
                     <div class="modal-footer">

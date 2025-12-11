@@ -22,12 +22,24 @@ def liste_paiements(module_id):
     """, (module_id,))
     module = curseur.fetchone()
     
+    # Calculer le total perçu
+    curseur.execute("SELECT SUM(montant) as total_percu FROM paiements WHERE module_id = %s", (module_id,))
+    resultat = curseur.fetchone()
+    total_percu = resultat['total_percu'] if resultat['total_percu'] else 0
+    
+    # Calculer le reste à payer
+    reste_a_payer = module['montant_total'] - float(total_percu)
+    
     # Récupération des paiements
-    curseur.execute("SELECT * FROM paiements WHERE module_id = %s ORDER BY date_paiement", (module_id,))
+    curseur.execute("SELECT * FROM paiements WHERE module_id = %s ORDER BY date_paiement DESC", (module_id,))
     paiements = curseur.fetchall()
     
     curseur.close()
-    return render_template('paiements/liste.html', module=module, paiements=paiements)
+    return render_template('paiements/liste.html', 
+                         module=module, 
+                         paiements=paiements,
+                         total_percu=total_percu,
+                         reste_a_payer=reste_a_payer)
 
 
 @bp_paiements.route('/ajouter', methods=['POST'])
@@ -36,7 +48,7 @@ def ajouter_paiement():
     module_id = request.form['module_id']
     montant = float(request.form['montant'])
     type_paiement = request.form['type_paiement']
-    reference = request.form['reference']
+    reference = request.form.get('reference', '').strip()
 
     db = obtenir_db()
     curseur = db.cursor()
@@ -51,21 +63,29 @@ def ajouter_paiement():
     module = curseur.fetchone()
     montant_total = module['montant_total'] if module else 0
 
+    # Calculer le reste à payer
+    reste_a_payer = montant_total - float(total_percu)
+
+    # Vérifier si le montant dépasse ce qui reste à payer
+    if montant > reste_a_payer:
+        flash(f'Le montant ne peut pas dépasser le reste à payer ({reste_a_payer:,.0f} FCFA).', 'danger')
+        return redirect(f'/paiements/module/{module_id}')
+
     # Calculer le nouveau total après ce paiement
     nouveau_total_percu = float(total_percu) + montant
 
-    # Vérifier si le nouveau paiement dépasse le montant total
-    if nouveau_total_percu > montant_total:
-        flash('Le montant total des paiements ne peut pas dépasser le montant total du module.', 'danger')
-        return redirect(f'/paiements/module/{module_id}')
-
     # Déterminer le statut automatiquement
-    if nouveau_total_percu == montant_total:
+    if nouveau_total_percu >= montant_total:
         statut = 'complet'
-    elif nouveau_total_percu < montant_total:
-        statut = 'partiel'
     else:
-        statut = 'excédent'
+        statut = 'partiel'
+
+    # Générer une référence automatique si non fournie
+    if not reference:
+        import datetime
+        curseur.execute("SELECT COUNT(*) as count FROM paiements WHERE module_id = %s", (module_id,))
+        count = curseur.fetchone()['count']
+        reference = f"PAY-{module_id}-{count + 1}-{datetime.datetime.now().strftime('%Y%m%d%H%M%S')}"
 
     placeholder = '?' if g.est_sqlite else '%s'
     curseur.execute(f"""
