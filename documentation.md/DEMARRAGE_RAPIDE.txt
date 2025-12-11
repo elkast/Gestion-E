@@ -1,0 +1,96 @@
+╔═══════════════════════════════════════════════════════════════╗
+║                                                               ║
+║     GESTION ENSEIGNEMENT - MR KOFFI ELISE                    ║
+║     Application Desktop - Version Portable                    ║
+║                                                               ║
+╚═══════════════════════════════════════════════════════════════╝
+
+📋 DEMARRAGE RAPIDE
+═══════════════════════════════════════════════════════════════
+
+1️⃣  PREREQUIS
+   ✓ Python 3.8 ou supérieur installé
+   ✓ Télécharger depuis : https://www.python.org/
+   ✓ IMPORTANT : Cocher "Add Python to PATH"
+
+2️⃣  PREMIERE UTILISATION
+   ✓ Double-cliquer sur : lancer_application.bat
+   ✓ Les dépendances s'installeront automatiquement
+   ✓ L'application s'ouvrira dans votre navigateur
+
+3️⃣  UTILISATIONS SUIVANTES
+   ✓ Double-cliquer sur : lancer_application.bat
+   ✓ C'est tout ! 🎉
+
+═══════════════════════════════════════════════════════════════
+
+🎯 FONCTIONNALITES PRINCIPALES
+
+✅ Gestion des Établissements
+   - Ajouter, modifier, supprimer des écoles
+   - Suivre les volumes par niveau
+
+✅ Gestion des Modules
+   - Créer des modules d'enseignement
+   - Calculs automatiques des montants
+   - Volumes horaires (CM, TD, TP)
+
+✅ Gestion des Paiements
+   - Enregistrer les paiements
+   - Références automatiques
+   - Validation des montants
+   - Suivi du reste à payer
+
+✅ Exports
+   - Export Excel
+   - Export PDF
+   - États financiers
+
+═══════════════════════════════════════════════════════════════
+
+💾 SAUVEGARDE DES DONNEES
+
+Vos données sont dans : data/gestion.db
+
+Pour sauvegarder :
+✓ Copiez le fichier data/gestion.db
+✓ Collez-le dans un endroit sûr
+✓ Ou sur une clé USB
+
+Pour restaurer :
+✓ Remplacez data/gestion.db par votre sauvegarde
+
+═══════════════════════════════════════════════════════════════
+
+🆘 PROBLEMES COURANTS
+
+❌ "Python n'est pas reconnu"
+   → Python n'est pas installé ou pas dans le PATH
+   → Réinstaller Python en cochant "Add to PATH"
+
+❌ "Module flask not found"
+   → Lancer : installer_dependances.bat
+
+❌ L'application ne s'ouvre pas
+   → Vérifier que le port 5000 n'est pas utilisé
+   → Redémarrer l'ordinateur
+
+═══════════════════════════════════════════════════════════════
+
+📞 SUPPORT
+
+Pour toute question, contactez l'administrateur.
+
+═══════════════════════════════════════════════════════════════
+
+✨ NOUVEAUTES DE CETTE VERSION
+
+✅ Validation stricte des paiements
+✅ Références automatiques
+✅ Colonne "Reste" dans les paiements
+✅ Application desktop complète
+✅ Interface optimisée et rapide
+
+═══════════════════════════════════════════════════════════════
+
+Bon travail ! 🎓

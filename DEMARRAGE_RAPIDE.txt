@@ -1,0 +1,101 @@
+╔═══════════════════════════════════════════════════════════════╗
+║                                                               ║
+║     GESTION ENSEIGNEMENT - MR KOFFI ELISE                    ║
+║     Application Desktop - Version Portable                    ║
+║                                                               ║
+╚═══════════════════════════════════════════════════════════════╝
+
+📋 DEMARRAGE RAPIDE
+═══════════════════════════════════════════════════════════════
+
+📦 VERSION EXECUTABLE (EXE) - RECOMMANDEE
+   ✓ Double-cliquer sur : GestionEnseignement.exe
+   ✓ L'application s'ouvrira automatiquement
+   ✓ Aucune installation requise ! 🎉
+
+📦 VERSION PYTHON (Si vous avez Python)
+   1️⃣  PREREQUIS
+      ✓ Python 3.8 ou supérieur installé
+      ✓ Télécharger depuis : https://www.python.org/
+
+   2️⃣  PREMIERE UTILISATION
+      ✓ Double-cliquer sur : lancer_application.bat
+      ✓ Les dépendances s'installeront automatiquement
+
+   3️⃣  UTILISATIONS SUIVANTES
+      ✓ Double-cliquer sur : lancer_application.bat
+
+═══════════════════════════════════════════════════════════════
+
+🎯 FONCTIONNALITES PRINCIPALES
+
+✅ Gestion des Établissements
+   - Ajouter, modifier, supprimer des écoles
+   - Suivre les volumes par niveau
+
+✅ Gestion des Modules
+   - Créer des modules d'enseignement
+   - Calculs automatiques des montants
+   - Volumes horaires (CM, TD, TP)
+   - Années universitaires automatiques
+
+✅ Gestion des Paiements
+   - Enregistrer les paiements
+   - Références automatiques
+   - Validation des montants
+   - Suivi du reste à payer
+
+✅ Exports
+   - Export Excel
+   - Export PDF
+   - États financiers
+
+═══════════════════════════════════════════════════════════════
+
+💾 SAUVEGARDE DES DONNEES
+
+Vos données sont dans : data/gestion.db
+
+Pour sauvegarder :
+✓ Copiez le fichier data/gestion.db
+✓ Collez-le dans un endroit sûr
+✓ Ou sur une clé USB
+
+Pour restaurer :
+✓ Remplacez data/gestion.db par votre sauvegarde
+
+═══════════════════════════════════════════════════════════════
+
+🆘 PROBLEMES COURANTS
+
+❌ "Python n'est pas reconnu" (Version Python uniquement)
+   → Python n'est pas installé ou pas dans le PATH
+   → Réinstaller Python en cochant "Add to PATH"
+
+❌ L'application ne s'ouvre pas (Version EXE)
+   → Vérifier que l'antivirus ne bloque pas
+   → Ajouter une exception si nécessaire
+
+❌ "Module flask not found" (Version Python)
+   → Lancer : installer_dependances.bat
+
+═══════════════════════════════════════════════════════════════
+
+📞 SUPPORT
+
+Pour toute question, contactez l'administrateur.
+
+═══════════════════════════════════════════════════════════════
+
+✨ NOUVEAUTES DE CETTE VERSION
+
+✅ Validation stricte des paiements
+✅ Références automatiques
+✅ Colonne "Reste" dans les paiements
+✅ Années universitaires automatiques (10 ans)
+✅ Application EXE disponible (aucune installation requise)
+✅ Interface optimisée et rapide
+
+═══════════════════════════════════════════════════════════════
+
+Bon travail ! 🎓
